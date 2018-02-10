@@ -1,0 +1,14 @@
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+*.sqlite
+
+build/
+bin/[dD]ebug/*.exe
+bin/[dD]ebug/*.ilk
+bin/[dD]ebug/*.pdb
+bin/[rR]elease/*.exe
+bin/[rR]elease/*.ilk
+bin/[rR]elease/*.pdb
