@@ -12,8 +12,9 @@ NeuralEdgeGroup::NeuralEdgeGroup(
 	, m_targetNodes(targetNodes)
 	, m_weightsBuffer(ClSystem::getInstance()->getContext(), CL_MEM_READ_WRITE, sizeof(cl_float) * m_sourceNodes->getNodeCount() * m_targetNodes->getNodeCount())
 {
-	const std::string kernel_code = (
-		"void kernel ss(const int source_value_count, const __global float* source_values, const __global float* weights, __global float* target_values){\n" 
+	const std::string kernelName = "test";
+	const std::string kernelCode = (
+		"void kernel test(const int source_value_count, const __global float* source_values, const __global float* weights, __global float* target_values){\n" 
 		"	const int id = get_global_id(0);\n"
 		"	float acc = 0.0f;\n"
 		"	for (int i = 0; i < source_value_count; i++)\n"
@@ -22,24 +23,12 @@ NeuralEdgeGroup::NeuralEdgeGroup(
 		"	}\n"
 		"	target_values[id] = acc;\n"
 		"}\n"
-		);
+	);
 
-	cl::Program::Sources sources;
-	sources.push_back({ kernel_code.c_str(), kernel_code.length() });
-
-	cl::Program program(ClSystem::getInstance()->getContext(), sources);
-	if (program.build({ ClSystem::getInstance()->getDevice() }) != CL_SUCCESS)
+	Optional<cl::Kernel> kernel = ClSystem::getInstance()->addKernel(kernelName, kernelCode);
+	if (kernel)
 	{
-		LOG_ERROR(std::string("building OpenCL program failed: ") + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(ClSystem::getInstance()->getDevice()));
-		return;
-	}
-
-	cl_int error;
-	m_kernel = cl::Kernel(program, "ss", &error);
-	if (error != CL_SUCCESS)
-	{
-		LOG_ERROR("Creating the kernel failed.");
-		return;
+		m_kernel = kernel.get();
 	}
 }
 

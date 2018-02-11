@@ -12,8 +12,9 @@ add_files(
 	utility/random/RandomNumberGenerator.cpp
 	utility/random/RandomNumberGenerator.h
 	utility/random/WeightedRandomGenerator.h
-	utility/Matrix.h
 	utility/logging.h
+	utility/Matrix.h
+	utility/Optional.h
 	
 	main.cpp
 )

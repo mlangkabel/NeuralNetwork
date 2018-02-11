@@ -1,15 +1,15 @@
-#ifndef ARRAY_2D_H
-#define ARRAY_2D_H
+#ifndef MATRIX_H
+#define MATRIX_H
 
 template <typename T>
 class Matrix
 {
 public:
 	Matrix(const int width, const int height);
-	Matrix(const Matrix<T>& o);
+	Matrix(const Matrix<T>& rhs);
 	~Matrix();
 
-	Matrix<T>& operator=(const Matrix<T>& o);
+	Matrix<T>& operator=(const Matrix<T>& rhs);
 
 	int getWidth() const;
 	int getHeight() const;
@@ -36,14 +36,14 @@ Matrix<T>::Matrix(const int width, const int height)
 }
 
 template <typename T>
-Matrix<T>::Matrix(const Matrix<T>& o)
-	: m_width(o.m_width)
-	, m_height(o.m_height)
+Matrix<T>::Matrix(const Matrix<T>& rhs)
+	: m_width(rhs.m_width)
+	, m_height(rhs.m_height)
 {
 	m_values = new T[m_width * m_height];
 	for (int i = 0; i < m_width * m_height; i++)
 	{
-		m_values[i] = o.m_values[i];
+		m_values[i] = rhs.m_values[i];
 	}
 }
 
@@ -54,20 +54,20 @@ Matrix<T>::~Matrix()
 }
 
 template <typename T>
-Matrix<T>& Matrix<T>::operator=(const Matrix<T>& o)
+Matrix<T>& Matrix<T>::operator=(const Matrix<T>& rhs)
 {
-	if (this = &o)
+	if (this = &rhs)
 	{
 		return *this;
 	}
 	delete[] m_values;
 
-	m_width = o.m_width;
-	m_height = o.m_height;
+	m_width = rhs.m_width;
+	m_height = rhs.m_height;
 	m_values = new T[m_width * m_height];
 	for (int i = 0; i < m_width * m_height; i++)
 	{
-		m_values[i] = o.m_values[i];
+		m_values[i] = rhs.m_values[i];
 	}
 }
 
@@ -107,4 +107,4 @@ T Matrix<T>::getValue(const int x, const int y) const
 	return m_values[x + y * m_width];
 }
 
-#endif // ARRAY_2D_H
+#endif // MATRIX_H

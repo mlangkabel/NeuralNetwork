@@ -15,8 +15,46 @@ std::shared_ptr<ClSystem> ClSystem::getInstance()
 	return s_instance;
 }
 
+void ClSystem::clearInstance()
+{
+	s_instance.reset();
+	s_initialized = false;
+}
+
 ClSystem::~ClSystem()
 {
+}
+
+Optional<cl::Kernel> ClSystem::addKernel(const std::string& name, const std::string& code)
+{
+	std::map<std::string, std::pair<std::string, cl::Kernel>>::const_iterator it = m_kernels.find(name);
+	if (it != m_kernels.end())
+	{
+		if (it->second.first == code)
+		{
+			return Optional<cl::Kernel>(it->second.second);
+		}
+		LOG_ERROR("Existing kernel \"" + name + "\" does not match code of newly created one.");
+		return Optional<cl::Kernel>();
+	}
+
+	Optional<cl::Kernel> kernel = buildKernel(name, code);
+	if (kernel)
+	{
+		m_kernels.insert(std::make_pair(name, std::make_pair(code, kernel.get())));
+	}
+	return kernel;
+}
+
+Optional<cl::Kernel> ClSystem::getKernel(const std::string& name)
+{
+	std::map<std::string, std::pair<std::string, cl::Kernel>>::const_iterator it = m_kernels.find(name);
+	if (it != m_kernels.end())
+	{
+		return Optional<cl::Kernel>(it->second.second);
+	}
+	LOG_ERROR("No kernel found for name \"" + name + "\".");
+	return Optional<cl::Kernel>();
 }
 
 cl::Platform ClSystem::getPlatform()
@@ -37,6 +75,10 @@ cl::Context ClSystem::getContext()
 cl::CommandQueue ClSystem::getQueue()
 {
 	return m_queue;
+}
+
+ClSystem::ClSystem()
+{
 }
 
 bool ClSystem::initialize()
@@ -73,10 +115,28 @@ bool ClSystem::initialize()
 	return true;
 }
 
+Optional<cl::Kernel> ClSystem::buildKernel(const std::string& name, const std::string& code)
+{
+	cl::Program::Sources sources;
+	sources.push_back({ code.c_str(), code.length() });
+
+	cl::Program program(m_context, sources);
+	if (program.build({ m_device }) != CL_SUCCESS)
+	{
+		LOG_ERROR(std::string("Building OpenCL program \"" + name + "\" failed: ") + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(ClSystem::getInstance()->getDevice()));
+		return Optional<cl::Kernel>();
+	}
+
+	cl_int error;
+	cl::Kernel kernel(program, name.c_str(), &error);
+	if (error != CL_SUCCESS)
+	{
+		LOG_ERROR("Creating the kernel failed.");
+		return Optional<cl::Kernel>();
+	}
+
+	return Optional<cl::Kernel>(kernel);
+}
+
 std::shared_ptr<ClSystem> ClSystem::s_instance;
 bool ClSystem::s_initialized = false;
-
-ClSystem::ClSystem()
-{
-	
-}

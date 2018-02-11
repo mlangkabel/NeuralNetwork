@@ -6,12 +6,18 @@
 
 #include "neural_network/NeuralNodeGroup.h"
 #include "neural_network/NeuralEdgeGroup.h"
+#include "utility/cl/ClSystem.h"
 #include "utility/random/RandomNumberGenerator.h"
 #include "utility/logging.h"
 
 int main()
 {
-	const int NODE_COUNT = 5000;
+	if (!ClSystem::getInstance())
+	{
+		return EXIT_FAILURE;
+	}
+
+	const int NODE_COUNT = 1000;
 	const int REPETITIONS = 2000;
 	RandomNumberGenerator rng(1);
 
@@ -64,5 +70,6 @@ int main()
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
 	std::cout << "duration: " << (float(duration) / REPETITIONS) << std::endl;
-	return 0;
+
+	return EXIT_SUCCESS;
 }
