@@ -15,10 +15,7 @@ class NeuralEdgeGroup
 public:
 	NeuralEdgeGroup(
 		std::shared_ptr<NeuralNodeGroup> sourceNodes, 
-		std::shared_ptr<NeuralNodeGroup> targetNodes, 
-		cl::Device device,
-		cl::Context context,
-		cl::CommandQueue queue
+		std::shared_ptr<NeuralNodeGroup> targetNodes
 	);
 
 	void setWeights(Matrix<float> weights);
@@ -29,9 +26,6 @@ public:
 private:
 	std::shared_ptr<NeuralNodeGroup> m_sourceNodes;
 	std::shared_ptr<NeuralNodeGroup> m_targetNodes;
-	cl::Device m_device;
-	cl::Context m_context;
-	cl::CommandQueue m_queue;
 	cl::Kernel m_kernel;
 	cl::Buffer m_weightsBuffer;
 };

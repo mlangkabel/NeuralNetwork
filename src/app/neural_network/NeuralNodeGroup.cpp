@@ -1,12 +1,11 @@
 #include "neural_network/NeuralNodeGroup.h"
 
+#include "utility/cl/ClSystem.h"
 #include "utility/logging.h"
 
-NeuralNodeGroup::NeuralNodeGroup(const int nodeCount, cl::Context context, cl::CommandQueue queue)
+NeuralNodeGroup::NeuralNodeGroup(const int nodeCount)
 	: m_nodeCount(nodeCount)
-	, m_context(context)
-	, m_queue(queue)
-	, m_activationLevelsBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_float) * nodeCount)
+	, m_activationLevelsBuffer(ClSystem::getInstance()->getContext(), CL_MEM_READ_WRITE, sizeof(cl_float) * nodeCount)
 {
 }
 
@@ -24,7 +23,7 @@ void NeuralNodeGroup::setActivationLevels(std::vector<float> activationLevels)
 {
 	if (activationLevels.size() == m_nodeCount)
 	{
-		m_queue.enqueueWriteBuffer(m_activationLevelsBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &activationLevels[0]);
+		ClSystem::getInstance()->getQueue().enqueueWriteBuffer(m_activationLevelsBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &activationLevels[0]);
 	}
 	else
 	{
@@ -35,6 +34,6 @@ void NeuralNodeGroup::setActivationLevels(std::vector<float> activationLevels)
 std::vector<float> NeuralNodeGroup::getActivationLevels()
 {
 	std::vector<float> activationLevels(m_nodeCount, 0.0f);
-	m_queue.enqueueReadBuffer(m_activationLevelsBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &activationLevels[0]);
+	ClSystem::getInstance()->getQueue().enqueueReadBuffer(m_activationLevelsBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &activationLevels[0]);
 	return activationLevels;
 }

@@ -9,7 +9,7 @@
 class NeuralNodeGroup
 {
 public:
-	NeuralNodeGroup(const int nodeCount, cl::Context context, cl::CommandQueue queue);
+	NeuralNodeGroup(const int nodeCount);
 
 	int getNodeCount() const;
 	cl::Buffer getBuffer();
@@ -18,8 +18,6 @@ public:
 	std::vector<float> getActivationLevels();
 private:
 	const int m_nodeCount;
-	cl::Context m_context;
-	cl::CommandQueue m_queue;
 	cl::Buffer m_activationLevelsBuffer;
 };
 

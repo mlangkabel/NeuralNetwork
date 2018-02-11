@@ -1,4 +1,4 @@
-#include "RandomNumberGenerator.h"
+#include "utility/random/RandomNumberGenerator.h"
 
 RandomNumberGenerator::RandomNumberGenerator(unsigned int seed):
 	m_seed(seed),

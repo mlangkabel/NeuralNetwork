@@ -11,37 +11,11 @@
 
 int main()
 {
-	std::vector<cl::Platform> all_platforms;
-	cl::Platform::get(&all_platforms);
-	if (all_platforms.size() == 0) 
-	{
-		LOG_ERROR("No platforms found. Check OpenCL installation!");
-		exit(1);
-	}
-	cl::Platform default_platform = all_platforms[0];
-	LOG_INFO("Using platform: " + default_platform.getInfo<CL_PLATFORM_NAME>() + " Version: " + default_platform.getInfo<CL_PLATFORM_VERSION>());
-
-	//get default device of the default platform
-	std::vector<cl::Device> all_devices;
-	default_platform.getDevices(CL_DEVICE_TYPE_ALL, &all_devices);
-	if (all_devices.size() == 0) {
-		LOG_ERROR("No devices found. Check OpenCL installation!");
-		exit(1);
-	}
-	cl::Device default_device = all_devices[0];
-	LOG_INFO("Using device: " + default_device.getInfo<CL_DEVICE_NAME>());
-
-	cl::Context context(default_device);
-
-	//create queue to which we will push commands for the device.
-	cl::CommandQueue queue(context, default_device);
-
-
 	const int NODE_COUNT = 5000;
 	const int REPETITIONS = 2000;
 	RandomNumberGenerator rng(1);
 
-	std::shared_ptr<NeuralNodeGroup> sourceNodeGroup = std::make_shared<NeuralNodeGroup>(NODE_COUNT, context, queue);
+	std::shared_ptr<NeuralNodeGroup> sourceNodeGroup = std::make_shared<NeuralNodeGroup>(NODE_COUNT);
 	{
 		std::vector<float> activationLevels(NODE_COUNT);
 		for (int i = 0; i < NODE_COUNT; i++)
@@ -57,9 +31,9 @@ int main()
 	}
 	std::cout << std::endl;
 
-	std::shared_ptr<NeuralNodeGroup> targetNodeGroup = std::make_shared<NeuralNodeGroup>(NODE_COUNT, context, queue);
+	std::shared_ptr<NeuralNodeGroup> targetNodeGroup = std::make_shared<NeuralNodeGroup>(NODE_COUNT);
 
-	NeuralEdgeGroup edgeGroup(sourceNodeGroup, targetNodeGroup, default_device, context, queue);
+	NeuralEdgeGroup edgeGroup(sourceNodeGroup, targetNodeGroup);
 	
 	{
 		Matrix<float> weights(NODE_COUNT, NODE_COUNT);

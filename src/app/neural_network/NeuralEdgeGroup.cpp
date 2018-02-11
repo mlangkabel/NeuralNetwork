@@ -1,21 +1,16 @@
 #include "neural_network/NeuralEdgeGroup.h"
 
 #include "neural_network/NeuralNodeGroup.h"
+#include "utility/cl/ClSystem.h"
 #include "utility/logging.h"
 
 NeuralEdgeGroup::NeuralEdgeGroup(
 	std::shared_ptr<NeuralNodeGroup> sourceNodes, 
-	std::shared_ptr<NeuralNodeGroup> targetNodes, 
-	cl::Device device,
-	cl::Context context,
-	cl::CommandQueue queue
+	std::shared_ptr<NeuralNodeGroup> targetNodes
 )
 	: m_sourceNodes(sourceNodes)
 	, m_targetNodes(targetNodes)
-	, m_device(device)
-	, m_context(context)
-	, m_queue(queue)
-	, m_weightsBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_float) * m_sourceNodes->getNodeCount() * m_targetNodes->getNodeCount())
+	, m_weightsBuffer(ClSystem::getInstance()->getContext(), CL_MEM_READ_WRITE, sizeof(cl_float) * m_sourceNodes->getNodeCount() * m_targetNodes->getNodeCount())
 {
 	const std::string kernel_code = (
 		"void kernel ss(const int source_value_count, const __global float* source_values, const __global float* weights, __global float* target_values){\n" 
@@ -32,10 +27,10 @@ NeuralEdgeGroup::NeuralEdgeGroup(
 	cl::Program::Sources sources;
 	sources.push_back({ kernel_code.c_str(), kernel_code.length() });
 
-	cl::Program program(m_context, sources);
-	if (program.build({ m_device }) != CL_SUCCESS)
+	cl::Program program(ClSystem::getInstance()->getContext(), sources);
+	if (program.build({ ClSystem::getInstance()->getDevice() }) != CL_SUCCESS)
 	{
-		LOG_ERROR(std::string("building OpenCL program failed: ") + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device));
+		LOG_ERROR(std::string("building OpenCL program failed: ") + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(ClSystem::getInstance()->getDevice()));
 		return;
 	}
 
@@ -52,7 +47,7 @@ void NeuralEdgeGroup::setWeights(Matrix<float> weights)
 {
 	if (weights.getWidth() == m_sourceNodes->getNodeCount() && weights.getHeight() == m_targetNodes->getNodeCount())
 	{
-		m_queue.enqueueWriteBuffer(m_weightsBuffer, CL_TRUE, 0, sizeof(cl_float) * weights.getElementCount(), &weights[0]);
+		ClSystem::getInstance()->getQueue().enqueueWriteBuffer(m_weightsBuffer, CL_TRUE, 0, sizeof(cl_float) * weights.getElementCount(), &weights[0]);
 	}
 	else
 	{
@@ -63,7 +58,7 @@ void NeuralEdgeGroup::setWeights(Matrix<float> weights)
 Matrix<float> NeuralEdgeGroup::getWeights()
 {
 	Matrix<float> weights(m_sourceNodes->getNodeCount(), m_targetNodes->getNodeCount());
-	m_queue.enqueueReadBuffer(m_weightsBuffer, CL_TRUE, 0, sizeof(cl_float) * weights.getElementCount(), &weights[0]);
+	ClSystem::getInstance()->getQueue().enqueueReadBuffer(m_weightsBuffer, CL_TRUE, 0, sizeof(cl_float) * weights.getElementCount(), &weights[0]);
 	return weights;
 }
 
@@ -73,6 +68,6 @@ void NeuralEdgeGroup::update()
 	m_kernel.setArg(1, m_sourceNodes->getBuffer());
 	m_kernel.setArg(2, m_weightsBuffer);
 	m_kernel.setArg(3, m_targetNodes->getBuffer());
-	m_queue.enqueueNDRangeKernel(m_kernel, cl::NullRange, cl::NDRange(m_sourceNodes->getNodeCount()), cl::NullRange);
-	m_queue.finish();
+	ClSystem::getInstance()->getQueue().enqueueNDRangeKernel(m_kernel, cl::NullRange, cl::NDRange(m_sourceNodes->getNodeCount()), cl::NullRange);
+	ClSystem::getInstance()->getQueue().finish();
 }

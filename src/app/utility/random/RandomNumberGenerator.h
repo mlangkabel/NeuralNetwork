@@ -23,4 +23,4 @@ private:
 	unsigned int m_m;
 };
 
-#endif
+#endif // RANDOM_NUMBER_GENERATOR_H

@@ -1,10 +1,10 @@
 #ifndef WEIGHTED_RANDOM_GENERATOR_H
 #define WEIGHTED_RANDOM_GENERATOR_H
 
-#include "RandomNumberGenerator.h"
-
 #include <iostream>
 #include <vector>
+
+#include "utility/random/RandomNumberGenerator.h"
 
 template <typename T>
 class WeightedRandomGenerator 
@@ -108,4 +108,4 @@ std::vector<T> WeightedRandomGenerator<T>::getResults(int count, bool allowDupli
 	return results;
 }
 	
-#endif
+#endif // WEIGHTED_RANDOM_GENERATOR_H
