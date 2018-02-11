@@ -28,10 +28,10 @@ int main()
 		{
 			activationLevels[i] = rng.getFloat();
 		}
-		sourceNodeGroup->setActivationLevels(activationLevels);
+		sourceNodeGroup->setExcitationLevels(activationLevels);
 	}
 
-	for (const float v: sourceNodeGroup->getActivationLevels())
+	for (const float v: sourceNodeGroup->getExcitationLevels())
 	{
 		std::cout << v << " ";
 	}
@@ -61,7 +61,7 @@ int main()
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 
 
-	for (const float v : targetNodeGroup->getActivationLevels())
+	for (const float v : targetNodeGroup->getExcitationLevels())
 	{
 		std::cout << v << " ";
 	}

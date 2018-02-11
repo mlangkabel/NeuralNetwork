@@ -5,7 +5,7 @@
 
 NeuralNodeGroup::NeuralNodeGroup(const int nodeCount)
 	: m_nodeCount(nodeCount)
-	, m_activationLevelsBuffer(ClSystem::getInstance()->getContext(), CL_MEM_READ_WRITE, sizeof(cl_float) * nodeCount)
+	, m_excitationLevelsBuffer(ClSystem::getInstance()->getContext(), CL_MEM_READ_WRITE, sizeof(cl_float) * nodeCount)
 {
 }
 
@@ -16,14 +16,14 @@ int NeuralNodeGroup::getNodeCount() const
 
 cl::Buffer NeuralNodeGroup::getBuffer()
 {
-	return m_activationLevelsBuffer;
+	return m_excitationLevelsBuffer;
 }
 
-void NeuralNodeGroup::setActivationLevels(std::vector<float> activationLevels)
+void NeuralNodeGroup::setExcitationLevels(std::vector<float> excitationLevels)
 {
-	if (activationLevels.size() == m_nodeCount)
+	if (excitationLevels.size() == m_nodeCount)
 	{
-		ClSystem::getInstance()->getQueue().enqueueWriteBuffer(m_activationLevelsBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &activationLevels[0]);
+		ClSystem::getInstance()->getQueue().enqueueWriteBuffer(m_excitationLevelsBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &excitationLevels[0]);
 	}
 	else
 	{
@@ -31,9 +31,9 @@ void NeuralNodeGroup::setActivationLevels(std::vector<float> activationLevels)
 	}
 }
 
-std::vector<float> NeuralNodeGroup::getActivationLevels()
+std::vector<float> NeuralNodeGroup::getExcitationLevels()
 {
-	std::vector<float> activationLevels(m_nodeCount, 0.0f);
-	ClSystem::getInstance()->getQueue().enqueueReadBuffer(m_activationLevelsBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &activationLevels[0]);
-	return activationLevels;
+	std::vector<float> excitationLevels(m_nodeCount, 0.0f);
+	ClSystem::getInstance()->getQueue().enqueueReadBuffer(m_excitationLevelsBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &excitationLevels[0]);
+	return excitationLevels;
 }

@@ -15,4 +15,6 @@ add_files(
 	utility/logging.h
 	utility/Matrix.h
 	utility/Optional.h
+	utility/utility.cpp
+	utility/utility.h
 )

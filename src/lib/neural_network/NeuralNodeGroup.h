@@ -14,11 +14,11 @@ public:
 	int getNodeCount() const;
 	cl::Buffer getBuffer();
 
-	void setActivationLevels(std::vector<float> activationLevels);
-	std::vector<float> getActivationLevels();
+	void setExcitationLevels(std::vector<float> excitationLevels);
+	std::vector<float> getExcitationLevels();
 private:
 	const int m_nodeCount;
-	cl::Buffer m_activationLevelsBuffer;
+	cl::Buffer m_excitationLevelsBuffer;
 };
 
 
