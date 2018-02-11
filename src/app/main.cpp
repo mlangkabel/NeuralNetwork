@@ -1,10 +1,12 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
 
 #include <CL/cl.hpp>
 
 #include "neural_network/NeuralNodeGroup.h"
 #include "neural_network/NeuralEdgeGroup.h"
+#include "utility/random/RandomNumberGenerator.h"
 #include "utility/logging.h"
 
 int main()
@@ -34,31 +36,59 @@ int main()
 	//create queue to which we will push commands for the device.
 	cl::CommandQueue queue(context, default_device);
 
-	std::shared_ptr<NeuralNodeGroup> nodeGroup = std::make_shared<NeuralNodeGroup>(2, context, queue);
-	nodeGroup->setActivationLevels({ 3.6f, -6.0f });
 
-	for (const float v: nodeGroup->getActivationLevels()) 
+	const int NODE_COUNT = 5000;
+	const int REPETITIONS = 2000;
+	RandomNumberGenerator rng(1);
+
+	std::shared_ptr<NeuralNodeGroup> sourceNodeGroup = std::make_shared<NeuralNodeGroup>(NODE_COUNT, context, queue);
+	{
+		std::vector<float> activationLevels(NODE_COUNT);
+		for (int i = 0; i < NODE_COUNT; i++)
+		{
+			activationLevels[i] = rng.getFloat();
+		}
+		sourceNodeGroup->setActivationLevels(activationLevels);
+	}
+
+	for (const float v: sourceNodeGroup->getActivationLevels())
 	{
 		std::cout << v << " ";
 	}
 	std::cout << std::endl;
 
-	NeuralEdgeGroup edgeGroup(nodeGroup, nodeGroup, default_device, context, queue);
-	Matrix<float> weights(2, 2);
-	weights.setValue(0, 0, 1.0f);
-	weights.setValue(1, 0, 1.0f);
-	weights.setValue(0, 1, 1.0f);
-	weights.setValue(1, 1, 0.0f);
-	edgeGroup.setWeights(weights);
+	std::shared_ptr<NeuralNodeGroup> targetNodeGroup = std::make_shared<NeuralNodeGroup>(NODE_COUNT, context, queue);
 
-	edgeGroup.update();
+	NeuralEdgeGroup edgeGroup(sourceNodeGroup, targetNodeGroup, default_device, context, queue);
 	
+	{
+		Matrix<float> weights(NODE_COUNT, NODE_COUNT);
+		for (int j = 0; j < NODE_COUNT; j++)
+		{
+			for (int i = 0; i < NODE_COUNT; i++)
+			{
+				weights.setValue(i, j, rng.getFloat());
+			}
+		}
+		edgeGroup.setWeights(weights);
+	}
 
-	for (const float v : nodeGroup->getActivationLevels())
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	for (int i = 0; i < REPETITIONS; i++)
+	{
+		edgeGroup.update();
+	}
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+
+
+	for (const float v : targetNodeGroup->getActivationLevels())
 	{
 		std::cout << v << " ";
 	}
 	std::cout << std::endl;
 
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+	std::cout << "duration: " << (float(duration) / REPETITIONS) << std::endl;
 	return 0;
 }

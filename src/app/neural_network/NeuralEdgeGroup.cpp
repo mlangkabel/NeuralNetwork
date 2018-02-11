@@ -17,7 +17,35 @@ NeuralEdgeGroup::NeuralEdgeGroup(
 	, m_queue(queue)
 	, m_weightsBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_float) * m_sourceNodes->getNodeCount() * m_targetNodes->getNodeCount())
 {
+	const std::string kernel_code = (
+		"void kernel ss(const int source_value_count, const __global float* source_values, const __global float* weights, __global float* target_values){\n" 
+		"	const int id = get_global_id(0);\n"
+		"	float acc = 0.0f;\n"
+		"	for (int i = 0; i < source_value_count; i++)\n"
+		"	{\n"
+		"		acc += weights[source_value_count * id + i] * source_values[i];\n"
+		"	}\n"
+		"	target_values[id] = acc;\n"
+		"}\n"
+		);
 
+	cl::Program::Sources sources;
+	sources.push_back({ kernel_code.c_str(), kernel_code.length() });
+
+	cl::Program program(m_context, sources);
+	if (program.build({ m_device }) != CL_SUCCESS)
+	{
+		LOG_ERROR(std::string("building OpenCL program failed: ") + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device));
+		return;
+	}
+
+	cl_int error;
+	m_kernel = cl::Kernel(program, "ss", &error);
+	if (error != CL_SUCCESS)
+	{
+		LOG_ERROR("Creating the kernel failed.");
+		return;
+	}
 }
 
 void NeuralEdgeGroup::setWeights(Matrix<float> weights)
@@ -41,40 +69,10 @@ Matrix<float> NeuralEdgeGroup::getWeights()
 
 void NeuralEdgeGroup::update()
 {
-	const std::string kernel_code = (
-		"void kernel ss(const int source_value_count, const __global float* source_values, const __global float* weights, __global float* target_values){\n" // __constant image2d_t weights,
-		"	const int id = get_global_id(0);\n"
-		"	float acc = 0.0f;\n"
-		"	for (int i = 0; i < source_value_count; i++)\n"
-		"	{\n"
-		"		acc += weights[source_value_count * id + i] * source_values[i];\n"
-		"	}\n"
-		"	target_values[id] = acc;\n"
-		"}\n"
-	);
-
-	cl::Program::Sources sources;
-	sources.push_back({ kernel_code.c_str(), kernel_code.length() });
-
-	cl::Program program(m_context, sources);
-	if (program.build({ m_device }) != CL_SUCCESS) 
-	{
-		LOG_ERROR(std::string("building OpenCL program failed: ") + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device));
-		return;
-	}
-
-	cl_int error;
-	cl::Kernel kernel = cl::Kernel(program, "ss", &error);
-	if (error != CL_SUCCESS)
-	{
-		LOG_ERROR("Creating the kernel failed.");
-		return;
-	}
-
-	kernel.setArg(0, m_sourceNodes->getNodeCount());
-	kernel.setArg(1, m_sourceNodes->getBuffer());
-	kernel.setArg(2, m_weightsBuffer);
-	kernel.setArg(3, m_targetNodes->getBuffer());
-	m_queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(10), cl::NullRange);
+	m_kernel.setArg(0, m_sourceNodes->getNodeCount());
+	m_kernel.setArg(1, m_sourceNodes->getBuffer());
+	m_kernel.setArg(2, m_weightsBuffer);
+	m_kernel.setArg(3, m_targetNodes->getBuffer());
+	m_queue.enqueueNDRangeKernel(m_kernel, cl::NullRange, cl::NDRange(m_sourceNodes->getNodeCount()), cl::NullRange);
 	m_queue.finish();
 }
