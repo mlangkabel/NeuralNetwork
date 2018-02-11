@@ -6,21 +6,22 @@ include(cmake/create_source_groups.cmake)
 # set Standerd build type to Release
 set(CMAKE_BUILD_TYPE_INIT "Release")
 
+
 # Variables --------------------------------------------------------------------
 
 set(PROJECT_NAME NeuralNetwork)
 set(APP_PROJECT_NAME "${PROJECT_NAME}App")
 set(LIB_PROJECT_NAME "${PROJECT_NAME}Lib")
+set(TEST_PROJECT_NAME "${PROJECT_NAME}Test")
 
 LINK_DIRECTORIES($ENV{VLD_DIR}/lib/Win32) # this adds the library path for VLD, must be done before the project target is created
+
 
 # Project ----------------------------------------------------------------------
 
 project(${PROJECT_NAME})
 
-
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
 
 
 # Lib --------------------------------------------------------------------------
@@ -44,6 +45,7 @@ set_property(
 target_include_directories(${LIB_PROJECT_NAME} SYSTEM
 	PUBLIC ${OPENCL_INCLUDE_DIR}
 )
+
 
 # App --------------------------------------------------------------------------
 
@@ -70,6 +72,52 @@ set_property(
 	PROPERTY INCLUDE_DIRECTORIES
 		"${CMAKE_SOURCE_DIR}/src/app"
 		"${CMAKE_SOURCE_DIR}/src/lib"
+)
+
+
+# Test -------------------------------------------------------------------------
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/test)
+
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_main.cpp "")
+
+add_subdirectory(src/test)
+
+set(CXXTEST_INCLUDE_DIR $ENV{CXX_TEST_DIR})
+set(CXXTEST_PYTHON_TESTGEN_EXECUTABLE ${CXXTEST_INCLUDE_DIR}/bin/cxxtestgen)
+set(TESTGEN_FILE ${CMAKE_CURRENT_BINARY_DIR}/test_main.cpp)
+
+find_package(PythonInterp REQUIRED)
+
+add_executable (${TEST_PROJECT_NAME} ${TESTGEN_FILE} ${TEST_FILES})
+
+create_source_groups(${TEST_FILES})
+
+target_link_libraries(${TEST_PROJECT_NAME} ${LIB_PROJECT_NAME})
+
+find_package(CxxTest)
+
+if (CXXTEST_FOUND)
+	set_property(
+		TARGET ${TEST_PROJECT_NAME}
+		PROPERTY INCLUDE_DIRECTORIES
+			"${CMAKE_SOURCE_DIR}/src/lib"
+			"${CXXTEST_INCLUDE_DIR}"
+	)
+endif (CXXTEST_FOUND)
+
+add_custom_command(
+	TARGET ${TEST_PROJECT_NAME}
+	PRE_BUILD
+	COMMAND cd ${PROJECT_SOURCE_DIR} && ${PYTHON_EXECUTABLE} ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE} --runner=ParenPrinter -o ${TESTGEN_FILE} ${TEST_FILES}
+	COMMENT "Generating unittest code with cxxtestgen"
+)
+
+add_custom_command(
+	TARGET ${TEST_PROJECT_NAME}
+	POST_BUILD
+	COMMAND cd $(ProjectDir)../../bin/test/\n$(OutDir)$(TargetName)$(TargetExt)
+	COMMENT "Running unittest code"
 )
 
 # Visual Leak Detector ---------------------------------------------------------
