@@ -6,13 +6,17 @@
 
 #include <CL/cl.hpp>
 
+#include "utility/types.h"
+
 class NeuralNodeGroup
 {
 public:
-	NeuralNodeGroup(const int nodeCount);
+	NeuralNodeGroup(const Id id, const int nodeCount);
 	virtual ~NeuralNodeGroup();
 
+	Id getId() const;
 	int getNodeCount() const;
+
 	cl::Buffer getExcitationLevelsBuffer();
 	cl::Buffer getExcitationStatesBuffer();
 
@@ -25,6 +29,7 @@ public:
 	virtual void update() = 0;
 
 private:
+	const Id m_id;
 	const int m_nodeCount;
 	cl::Buffer m_excitationLevelsBuffer;
 	cl::Buffer m_excitationStatesBuffer;

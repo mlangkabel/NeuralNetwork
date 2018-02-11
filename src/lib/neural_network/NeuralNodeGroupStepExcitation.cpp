@@ -2,8 +2,8 @@
 
 #include "utility/cl/ClSystem.h"
 
-NeuralNodeGroupStepExcitation::NeuralNodeGroupStepExcitation(const int nodeCount, const float threshold)
-	: NeuralNodeGroup(nodeCount)
+NeuralNodeGroupStepExcitation::NeuralNodeGroupStepExcitation(const Id id, const int nodeCount, const float threshold)
+	: NeuralNodeGroup(id, nodeCount)
 	, m_threshold(threshold)
 {
 	const std::string kernelName = "excitation_step";

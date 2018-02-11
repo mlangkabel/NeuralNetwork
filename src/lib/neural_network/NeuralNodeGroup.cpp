@@ -3,8 +3,9 @@
 #include "utility/cl/ClSystem.h"
 #include "utility/logging.h"
 
-NeuralNodeGroup::NeuralNodeGroup(const int nodeCount)
-	: m_nodeCount(nodeCount)
+NeuralNodeGroup::NeuralNodeGroup(const Id id, const int nodeCount)
+	: m_id(id)
+	, m_nodeCount(nodeCount)
 	, m_excitationLevelsBuffer(ClSystem::getInstance()->getContext(), CL_MEM_READ_WRITE, sizeof(cl_float) * nodeCount)
 	, m_excitationStatesBuffer(ClSystem::getInstance()->getContext(), CL_MEM_READ_WRITE, sizeof(cl_float) * nodeCount)
 {
@@ -12,6 +13,11 @@ NeuralNodeGroup::NeuralNodeGroup(const int nodeCount)
 
 NeuralNodeGroup::~NeuralNodeGroup()
 {
+}
+
+Id NeuralNodeGroup::getId() const
+{
+	return m_id;
 }
 
 int NeuralNodeGroup::getNodeCount() const

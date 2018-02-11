@@ -29,10 +29,12 @@ SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 FIND_PACKAGE(OpenCL REQUIRED)
 
 add_subdirectory(src/lib)
+add_subdirectory(src/external)
 
-add_library(${LIB_PROJECT_NAME} ${LIB_FILES})
+add_library(${LIB_PROJECT_NAME} ${LIB_FILES} ${EXTERNAL_FILES})
 
 create_source_groups(${LIB_FILES})
+create_source_groups(${EXTERNAL_FILES})
 
 TARGET_LINK_LIBRARIES(${LIB_PROJECT_NAME} ${OPENCL_LIBRARY})
 
@@ -44,6 +46,7 @@ set_property(
 
 target_include_directories(${LIB_PROJECT_NAME} SYSTEM
 	PUBLIC ${OPENCL_INCLUDE_DIR}
+	"${CMAKE_SOURCE_DIR}/src/external"
 )
 
 

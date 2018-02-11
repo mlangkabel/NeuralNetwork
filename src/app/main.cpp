@@ -21,7 +21,7 @@ int main()
 	const int REPETITIONS = 2000;
 	RandomNumberGenerator rng(1);
 
-	std::shared_ptr<NeuralNodeGroup> sourceNodeGroup = std::make_shared<NeuralNodeGroupLinearExcitation>(NODE_COUNT);
+	std::shared_ptr<NeuralNodeGroup> sourceNodeGroup = std::make_shared<NeuralNodeGroupLinearExcitation>(1, NODE_COUNT, 1.0f);
 	{
 		std::vector<float> activationLevels(NODE_COUNT);
 		for (int i = 0; i < NODE_COUNT; i++)
@@ -37,7 +37,7 @@ int main()
 	}
 	std::cout << std::endl;
 
-	std::shared_ptr<NeuralNodeGroup> targetNodeGroup = std::make_shared<NeuralNodeGroupLinearExcitation>(NODE_COUNT);
+	std::shared_ptr<NeuralNodeGroup> targetNodeGroup = std::make_shared<NeuralNodeGroupLinearExcitation>(2, NODE_COUNT, 1.0f);
 
 	NeuralEdgeGroup edgeGroup(sourceNodeGroup, targetNodeGroup);
 	

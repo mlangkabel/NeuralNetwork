@@ -6,7 +6,7 @@
 class NeuralNodeGroupStepExcitation: public NeuralNodeGroup
 {
 public:
-	NeuralNodeGroupStepExcitation(const int nodeCount, const float threshold = 1.0f);
+	NeuralNodeGroupStepExcitation(const Id id, const int nodeCount, const float threshold);
 
 	virtual void update() override;
 
