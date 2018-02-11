@@ -54,9 +54,9 @@ Matrix<float> NeuralEdgeGroup::getWeights()
 void NeuralEdgeGroup::update()
 {
 	m_kernel.setArg(0, m_sourceNodes->getNodeCount());
-	m_kernel.setArg(1, m_sourceNodes->getBuffer());
+	m_kernel.setArg(1, m_sourceNodes->getExcitationStatesBuffer());
 	m_kernel.setArg(2, m_weightsBuffer);
-	m_kernel.setArg(3, m_targetNodes->getBuffer());
+	m_kernel.setArg(3, m_targetNodes->getExcitationLevelsBuffer());
 	ClSystem::getInstance()->getQueue().enqueueNDRangeKernel(m_kernel, cl::NullRange, cl::NDRange(m_sourceNodes->getNodeCount()), cl::NullRange);
 	ClSystem::getInstance()->getQueue().finish();
 }

@@ -6,6 +6,10 @@ add_files(
 	neural_network/NeuralEdgeGroup.h
 	neural_network/NeuralNodeGroup.cpp
 	neural_network/NeuralNodeGroup.h
+	neural_network/NeuralNodeGroupLinearExcitation.cpp
+	neural_network/NeuralNodeGroupLinearExcitation.h
+	neural_network/NeuralNodeGroupStepExcitation.cpp
+	neural_network/NeuralNodeGroupStepExcitation.h
 	
 	utility/cl/ClSystem.cpp
 	utility/cl/ClSystem.h
