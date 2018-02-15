@@ -3,10 +3,17 @@
 
 #include "neural_network/NeuralNodeGroup.h"
 
+class TiXmlElement;
+
 class NeuralNodeGroupStepExcitation: public NeuralNodeGroup
 {
 public:
+	static std::shared_ptr<NeuralNodeGroupStepExcitation> loadFromXmlElement(const TiXmlElement* element);
+
 	NeuralNodeGroupStepExcitation(const Id id, const int nodeCount, const float excitationThreshold, const float excitationFatigue);
+
+	float getExcitationThreshold() const;
+	float getExcitationFatigue() const;
 
 	virtual void update() override;
 

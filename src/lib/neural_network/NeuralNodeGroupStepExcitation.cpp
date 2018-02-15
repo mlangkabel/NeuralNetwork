@@ -1,6 +1,47 @@
 #include "neural_network/NeuralNodeGroupStepExcitation.h"
 
+#include "tinyxml/tinyxml.h"
+
 #include "utility/cl/ClSystem.h"
+
+std::shared_ptr<NeuralNodeGroupStepExcitation> NeuralNodeGroupStepExcitation::loadFromXmlElement(const TiXmlElement* element)
+{
+	std::shared_ptr<NeuralNodeGroupStepExcitation> nodeGroup;
+	if (element)
+	{
+		if (std::string(element->Value()) != "node_group_step_excitation")
+		{
+			return nodeGroup;
+		}
+
+		int id;
+		if (!element->QueryIntAttribute("id", &id) == TIXML_SUCCESS || id < 0)
+		{
+			return nodeGroup;
+		}
+
+		int nodeCount;
+		if (!element->QueryIntAttribute("node_count", &nodeCount) == TIXML_SUCCESS || nodeCount <= 0)
+		{
+			return nodeGroup;
+		}
+
+		float excitationThreshold;
+		if (!element->QueryFloatAttribute("excitation_threshold", &excitationThreshold) == TIXML_SUCCESS)
+		{
+			return nodeGroup;
+		}
+
+		float excitationFatigue;
+		if (!element->QueryFloatAttribute("excitation_fatigue", &excitationFatigue) == TIXML_SUCCESS)
+		{
+			return nodeGroup;
+		}
+
+		nodeGroup = std::make_shared<NeuralNodeGroupStepExcitation>(id, nodeCount, excitationThreshold, excitationFatigue);
+	}
+	return nodeGroup;
+}
 
 NeuralNodeGroupStepExcitation::NeuralNodeGroupStepExcitation(const Id id, const int nodeCount, const float excitationThreshold, const float excitationFatigue)
 	: NeuralNodeGroup(id, nodeCount)
@@ -25,6 +66,16 @@ NeuralNodeGroupStepExcitation::NeuralNodeGroupStepExcitation(const Id id, const 
 	{
 		m_kernel = kernel.get();
 	}
+}
+
+float NeuralNodeGroupStepExcitation::getExcitationThreshold() const
+{
+	return m_excitationThreshold;
+}
+
+float NeuralNodeGroupStepExcitation::getExcitationFatigue() const
+{
+	return m_excitationFatigue;
 }
 
 void NeuralNodeGroupStepExcitation::update()
