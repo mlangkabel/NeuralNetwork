@@ -5,6 +5,7 @@
 #include <CL/cl.hpp>
 
 #include "neural_network/NeuralNodeGroupLinearExcitation.h"
+#include "neural_network/NeuralNodeGroupStepExcitation.h"
 #include "neural_network/NeuralEdgeGroup.h"
 #include "utility/cl/ClSystem.h"
 #include "utility/random/RandomNumberGenerator.h"
@@ -21,7 +22,7 @@ int main()
 	const int REPETITIONS = 2000;
 	RandomNumberGenerator rng(1);
 
-	std::shared_ptr<NeuralNodeGroup> sourceNodeGroup = std::make_shared<NeuralNodeGroupLinearExcitation>(1, NODE_COUNT, 1.0f);
+	std::shared_ptr<NeuralNodeGroup> sourceNodeGroup = std::make_shared<NeuralNodeGroupStepExcitation>(1, NODE_COUNT, 0.5f, 0.0003);
 	{
 		std::vector<float> activationLevels(NODE_COUNT);
 		for (int i = 0; i < NODE_COUNT; i++)

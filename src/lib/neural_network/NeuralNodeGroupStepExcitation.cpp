@@ -2,15 +2,21 @@
 
 #include "utility/cl/ClSystem.h"
 
-NeuralNodeGroupStepExcitation::NeuralNodeGroupStepExcitation(const Id id, const int nodeCount, const float threshold)
+NeuralNodeGroupStepExcitation::NeuralNodeGroupStepExcitation(const Id id, const int nodeCount, const float excitationThreshold, const float excitationFatigue)
 	: NeuralNodeGroup(id, nodeCount)
-	, m_threshold(threshold)
+	, m_excitationThreshold(excitationThreshold)
+	, m_excitationFatigue(excitationFatigue)
 {
 	const std::string kernelName = "excitation_step";
 	const std::string kernelCode = (
-		"void kernel " + kernelName + "(const __global float* source_values, const float threshold, __global float* target_values){\n"
+		"void kernel " + kernelName + "(__global float* source_values, const float excitation_threshold, const float excitation_fatigue, __global float* target_values) {\n"
 		"	const int id = get_global_id(0);\n"
-		"	target_values[id] = source_values[id] < threshold ? 0.0 : 1.0;\n"
+		"	if (source_values[id] > excitation_threshold) {\n"
+		"		source_values[id] *= 1.0 - excitation_fatigue;\n"
+		"		target_values[id] = 1.0;\n"
+		"	} else {\n"
+		"		target_values[id] = 0.0;\n"
+		"	}\n"
 		"}\n"
 	);
 
@@ -24,8 +30,9 @@ NeuralNodeGroupStepExcitation::NeuralNodeGroupStepExcitation(const Id id, const 
 void NeuralNodeGroupStepExcitation::update()
 {
 	m_kernel.setArg(0, getExcitationLevelsBuffer());
-	m_kernel.setArg(1, m_threshold);
-	m_kernel.setArg(2, getExcitationStatesBuffer());
+	m_kernel.setArg(1, m_excitationThreshold);
+	m_kernel.setArg(2, m_excitationFatigue);
+	m_kernel.setArg(3, getExcitationStatesBuffer());
 	ClSystem::getInstance()->getQueue().enqueueNDRangeKernel(m_kernel, cl::NullRange, cl::NDRange(getNodeCount()), cl::NullRange);
 	ClSystem::getInstance()->getQueue().finish();
 }

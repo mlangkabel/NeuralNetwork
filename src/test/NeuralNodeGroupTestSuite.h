@@ -68,9 +68,9 @@ public:
 
 	void test_node_group_step_excitation_updates_excitation_state_correctly()
 	{
-		NeuralNodeGroupStepExcitation nodeGroup(1, 4, 0.5f);
+		NeuralNodeGroupStepExcitation nodeGroup(1, 4, 0.5f, 0.0f);
 
-		const std::vector<float> excitationLevels = { -1.0f, 0.4f, 0.5f, 0.6f };
+		const std::vector<float> excitationLevels = { -1.0f, 0.49f, 0.51f, 0.6f };
 		const std::vector<float> expectedExcitationStates = { 0.0f, 0.0f, 1.0f, 1.0f };
 
 		nodeGroup.setExcitationLevels(excitationLevels);
@@ -78,5 +78,32 @@ public:
 		nodeGroup.update();
 
 		TS_ASSERT_EQUALS(nodeGroup.getExcitationStates(), expectedExcitationStates);
+	}
+
+	void test_node_group_step_excitation_with_no_fatigue_maintains_excitation_levels()
+	{
+		NeuralNodeGroupStepExcitation nodeGroup(1, 4, 0.5f, 0.0f);
+
+		const std::vector<float> excitationLevels = { -1.0f, 0.49f, 0.51f, 0.6f };
+
+		nodeGroup.setExcitationLevels(excitationLevels);
+
+		nodeGroup.update();
+
+		TS_ASSERT_EQUALS(nodeGroup.getExcitationLevels(), excitationLevels);
+	}
+
+	void test_node_group_step_excitation_with_full_fatigue_discards_excitation_levels_for_excited_nodes()
+	{
+		NeuralNodeGroupStepExcitation nodeGroup(1, 4, 0.5f, 1.0f);
+
+		const std::vector<float> excitationLevels = { -1.0f, 0.49f, 0.51f, 0.6f };
+		const std::vector<float> expectedExcitationLevels = { -1.0f, 0.49f, 0.0f, 0.0f };
+
+		nodeGroup.setExcitationLevels(excitationLevels);
+
+		nodeGroup.update();
+
+		TS_ASSERT_EQUALS(nodeGroup.getExcitationLevels(), expectedExcitationLevels);
 	}
 };

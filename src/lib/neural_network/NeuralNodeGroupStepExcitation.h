@@ -6,12 +6,13 @@
 class NeuralNodeGroupStepExcitation: public NeuralNodeGroup
 {
 public:
-	NeuralNodeGroupStepExcitation(const Id id, const int nodeCount, const float threshold);
+	NeuralNodeGroupStepExcitation(const Id id, const int nodeCount, const float excitationThreshold, const float excitationFatigue);
 
 	virtual void update() override;
 
 private:
-	const float m_threshold;
+	const float m_excitationThreshold;
+	const float m_excitationFatigue;
 
 	cl::Kernel m_kernel;
 };
