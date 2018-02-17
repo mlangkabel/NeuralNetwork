@@ -8,11 +8,13 @@
 
 #include "utility/Matrix.h"
 
+class TiXmlElement;
 class NeuralNodeGroup;
 
 class NeuralEdgeGroup
 {
 public:
+	static std::shared_ptr<NeuralEdgeGroup> loadFromXmlElement(const TiXmlElement* element, const std::vector<std::shared_ptr<NeuralNodeGroup>>& nodeGroups);
 	NeuralEdgeGroup(
 		std::shared_ptr<NeuralNodeGroup> sourceNodes, 
 		std::shared_ptr<NeuralNodeGroup> targetNodes
