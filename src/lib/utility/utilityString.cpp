@@ -17,4 +17,10 @@ namespace utility
 
 		return c;
 	}
+
+	template <>
+	float fromString(const std::string& v)
+	{
+		return std::stof(v);
+	}
 }

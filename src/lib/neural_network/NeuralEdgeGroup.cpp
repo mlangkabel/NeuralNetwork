@@ -52,25 +52,10 @@ std::shared_ptr<NeuralEdgeGroup> NeuralEdgeGroup::loadFromXmlElement(const TiXml
 		if (sourceNodes && targetNodes)
 		{
 			Matrix<float> weights(sourceNodes->getNodeCount(), targetNodes->getNodeCount());
-			const std::vector<std::string> rowStrings = utility::split(weightsString, ";");
-			if (rowStrings.size() != weights.getHeight())
+			if (!weights.setValuesFromString(weightsString))
 			{
 				return nodeGroup;
 			}
-
-			for (int y = 0; y < rowStrings.size(); y++)
-			{
-				const std::vector<std::string> colStrings = utility::split(rowStrings[y], ",");
-				if (colStrings.size() != weights.getWidth())
-				{
-					return nodeGroup;
-				}
-				for (int x = 0; x < colStrings.size(); x++)
-				{
-					weights.setValue(x, y, std::stof(colStrings[x]));
-				}
-			}
-
 			nodeGroup = std::make_shared<NeuralEdgeGroup>(sourceNodes, targetNodes);
 			nodeGroup->setWeights(weights);
 		}

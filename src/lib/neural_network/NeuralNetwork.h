@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include <CL/cl.hpp>
+#include "utility/TextAccess.h"
 
 class NeuralNodeGroup;
 class NeuralEdgeGroup;
@@ -12,9 +12,11 @@ class NeuralEdgeGroup;
 class NeuralNetwork
 {
 public:
-	NeuralNetwork();
+	static std::shared_ptr<NeuralNetwork> load(std::shared_ptr<const TextAccess> textAccess);
 
 private:
+	NeuralNetwork();
+
 	std::vector<std::shared_ptr<NeuralNodeGroup>> m_nodeGroups;
 	std::vector<std::shared_ptr<NeuralEdgeGroup>> m_edgeGroups;
 };
