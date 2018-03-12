@@ -10,7 +10,6 @@ class Matrix
 public:
 	Matrix(const int width, const int height);
 	Matrix(const Matrix<T>& rhs);
-	~Matrix();
 
 	Matrix<T>& operator=(const Matrix<T>& rhs);
 	bool operator==(const Matrix<T>& rhs);
@@ -30,36 +29,25 @@ public:
 	std::string getValuesAsString() const;
 
 private:
-	const int m_width;
-	const int m_height;
-	T* m_values;
+	int m_width;
+	int m_height;
+	std::vector<T> m_values;
 };
 
 template <typename T>
 Matrix<T>::Matrix(const int width, const int height)
 	: m_width(width)
 	, m_height(height)
+	, m_values(m_width * m_height, 0)
 {
-	m_values = new T[m_width * m_height];
-	std::fill(m_values, m_values + sizeof(m_values), 0);
 }
 
 template <typename T>
 Matrix<T>::Matrix(const Matrix<T>& rhs)
 	: m_width(rhs.m_width)
 	, m_height(rhs.m_height)
+	, m_values(rhs.m_values)
 {
-	m_values = new T[m_width * m_height];
-	for (int i = 0; i < m_width * m_height; i++)
-	{
-		m_values[i] = rhs.m_values[i];
-	}
-}
-
-template <typename T>
-Matrix<T>::~Matrix()
-{
-	delete[] m_values;
 }
 
 template <typename T>
@@ -69,15 +57,12 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& rhs)
 	{
 		return *this;
 	}
-	delete[] m_values;
 
 	m_width = rhs.m_width;
 	m_height = rhs.m_height;
-	m_values = new T[m_width * m_height];
-	for (int i = 0; i < m_width * m_height; i++)
-	{
-		m_values[i] = rhs.m_values[i];
-	}
+	m_values = rhs.m_values;
+	
+	return *this;
 }
 
 template <typename T>

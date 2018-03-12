@@ -14,11 +14,19 @@ class NeuralNetwork
 public:
 	static std::shared_ptr<NeuralNetwork> load(std::shared_ptr<const TextAccess> textAccess);
 
+	void setInputExcitationLevels(std::vector<float> excitationLevels);
+	std::vector<float> getOutputExcitationStates();
+
+	void update();
+
 private:
 	NeuralNetwork();
 
 	std::vector<std::shared_ptr<NeuralNodeGroup>> m_nodeGroups;
 	std::vector<std::shared_ptr<NeuralEdgeGroup>> m_edgeGroups;
+
+	std::shared_ptr<NeuralNodeGroup> m_inputNodeGroup;
+	std::shared_ptr<NeuralNodeGroup> m_outputNodeGroup;
 };
 
 

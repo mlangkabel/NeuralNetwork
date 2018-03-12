@@ -2,6 +2,9 @@
 add_files(
 	LIB_FILES
 	
+	evolution/EvaluatedGenotype.h
+	evolution/EvolutionEnvironment.h
+	
 	neural_network/NeuralEdgeGroup.cpp
 	neural_network/NeuralEdgeGroup.h
 	neural_network/NeuralNetwork.cpp
@@ -21,6 +24,10 @@ add_files(
 	utility/logging.h
 	utility/Matrix.h
 	utility/Optional.h
+	utility/Profiler.cpp
+	utility/Profiler.h
+	utility/ScopedProfileTracer.cpp
+	utility/ScopedProfileTracer.h
 	utility/TextAccess.cpp
 	utility/TextAccess.h
 	utility/types.h

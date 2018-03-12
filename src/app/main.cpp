@@ -1,6 +1,4 @@
-#include <iostream>
 #include <vector>
-#include <chrono>
 
 #include <CL/cl.hpp>
 
@@ -8,70 +6,39 @@
 #include "neural_network/NeuralNodeGroupStepExcitation.h"
 #include "neural_network/NeuralEdgeGroup.h"
 #include "utility/cl/ClSystem.h"
-#include "utility/random/RandomNumberGenerator.h"
 #include "utility/logging.h"
+
+#include "NeuralNetworkGenotype.h"
+#include "NeuroEvolutionEnvironment.h"
+
+
 
 int main()
 {
+	const int populationSize = 10;
+	const int offspringSize = 10;
+	const int generationCount = 2;
+
 	if (!ClSystem::getInstance())
 	{
 		return EXIT_FAILURE;
 	}
 
-	const int NODE_COUNT = 1000;
-	const int REPETITIONS = 2000;
-	RandomNumberGenerator rng(1);
-
-	std::shared_ptr<NeuralNodeGroup> sourceNodeGroup = std::make_shared<NeuralNodeGroupStepExcitation>(1, NODE_COUNT, 0.5f, 0.0003);
+	NeuroEvolutionEnvironment evolutionEnvironment(populationSize, offspringSize, 0.1f);
+	for (int i = 0; i < populationSize; i++)
 	{
-		std::vector<float> activationLevels(NODE_COUNT);
-		for (int i = 0; i < NODE_COUNT; i++)
-		{
-			activationLevels[i] = rng.getFloat();
-		}
-		sourceNodeGroup->setExcitationLevels(activationLevels);
+		evolutionEnvironment.addGenotype(createRandomNeuralNetworkGenotype(10));
 	}
 
-	for (const float v: sourceNodeGroup->getExcitationLevels())
+	for (int i = 0; i < generationCount; i++)
 	{
-		std::cout << v << " ";
-	}
-	std::cout << std::endl;
-
-	std::shared_ptr<NeuralNodeGroup> targetNodeGroup = std::make_shared<NeuralNodeGroupLinearExcitation>(2, NODE_COUNT, 1.0f);
-
-	NeuralEdgeGroup edgeGroup(sourceNodeGroup, targetNodeGroup);
-	
-	{
-		Matrix<float> weights(NODE_COUNT, NODE_COUNT);
-		for (int j = 0; j < NODE_COUNT; j++)
-		{
-			for (int i = 0; i < NODE_COUNT; i++)
-			{
-				weights.setValue(i, j, rng.getFloat());
-			}
-		}
-		edgeGroup.setWeights(weights);
+		evolutionEnvironment.processGeneration();
+		LOG_INFO("Generations processed: " + std::to_string(evolutionEnvironment.getGenerationCount()));
 	}
 
-	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-	for (int i = 0; i < REPETITIONS; i++)
-	{
-		sourceNodeGroup->update();
-		edgeGroup.update();
-	}
-	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-
-
-	for (const float v : targetNodeGroup->getExcitationLevels())
-	{
-		std::cout << v << " ";
-	}
-	std::cout << std::endl;
-
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-
-	std::cout << "duration: " << (float(duration) / REPETITIONS) << std::endl;
+	LOG_INFO("Done. Highest score: " + std::to_string(evolutionEnvironment.getHighestFitness()));
+	NeuralNetworkGenotype genotype = evolutionEnvironment.getGenotypeWithHighestFittness();
+	runPingEvaluation(genotype, true);
 
 	return EXIT_SUCCESS;
 }
