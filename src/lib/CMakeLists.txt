@@ -26,6 +26,8 @@ add_files(
 	utility/types.h
 	utility/utility.cpp
 	utility/utility.h
+	utility/utilityRandom.cpp
+	utility/utilityRandom.h
 	utility/utilityString.cpp
 	utility/utilityString.h
 )
