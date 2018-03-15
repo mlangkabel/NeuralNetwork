@@ -2,16 +2,14 @@
 
 #include <CL/cl.hpp>
 
-#include "neural_network/NeuralNodeGroupLinearExcitation.h"
-#include "neural_network/NeuralNodeGroupStepExcitation.h"
-#include "neural_network/NeuralEdgeGroup.h"
+#include "neural_network/gpu/NeuralNodeGroupLinearExcitationGpu.h"
+#include "neural_network/gpu/NeuralNodeGroupStepExcitationGpu.h"
+#include "neural_network/gpu/NeuralEdgeGroupGpu.h"
 #include "utility/cl/ClSystem.h"
 #include "utility/logging.h"
 
 #include "NeuralNetworkGenotype.h"
 #include "NeuroEvolutionEnvironment.h"
-
-
 
 int main()
 {

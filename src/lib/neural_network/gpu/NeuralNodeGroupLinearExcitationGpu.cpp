@@ -1,12 +1,12 @@
-#include "neural_network/NeuralNodeGroupLinearExcitation.h"
+#include "neural_network/gpu/NeuralNodeGroupLinearExcitationGpu.h"
 
 #include "tinyxml/tinyxml.h"
 
 #include "utility/cl/ClSystem.h"
 
-std::shared_ptr<NeuralNodeGroupLinearExcitation> NeuralNodeGroupLinearExcitation::loadFromXmlElement(const TiXmlElement* element)
+std::shared_ptr<NeuralNodeGroupLinearExcitationGpu> NeuralNodeGroupLinearExcitationGpu::loadFromXmlElement(const TiXmlElement* element)
 {
-	std::shared_ptr<NeuralNodeGroupLinearExcitation> nodeGroup;
+	std::shared_ptr<NeuralNodeGroupLinearExcitationGpu> nodeGroup;
 	if (element)
 	{
 		if (std::string(element->Value()) != "node_group_linear_excitation")
@@ -32,13 +32,13 @@ std::shared_ptr<NeuralNodeGroupLinearExcitation> NeuralNodeGroupLinearExcitation
 			return nodeGroup;
 		}
 
-		nodeGroup = std::make_shared<NeuralNodeGroupLinearExcitation>(id, nodeCount, excitationFactor);
+		nodeGroup = std::make_shared<NeuralNodeGroupLinearExcitationGpu>(id, nodeCount, excitationFactor);
 	}
 	return nodeGroup;
 }
 
-NeuralNodeGroupLinearExcitation::NeuralNodeGroupLinearExcitation(const Id id, const int nodeCount, const float excitationFactor)
-	: NeuralNodeGroup(id, nodeCount)
+NeuralNodeGroupLinearExcitationGpu::NeuralNodeGroupLinearExcitationGpu(const Id id, const int nodeCount, const float excitationFactor)
+	: NeuralNodeGroupGpu(id, nodeCount)
 	, m_excitationFactor(excitationFactor)
 {
 	const std::string kernelName = "excitation_linear";
@@ -56,12 +56,12 @@ NeuralNodeGroupLinearExcitation::NeuralNodeGroupLinearExcitation(const Id id, co
 	}
 }
 
-float NeuralNodeGroupLinearExcitation::getExcitationFactor() const
+float NeuralNodeGroupLinearExcitationGpu::getExcitationFactor() const
 {
 	return m_excitationFactor;
 }
 
-void NeuralNodeGroupLinearExcitation::update()
+void NeuralNodeGroupLinearExcitationGpu::update()
 {
 	m_kernel.setArg(0, getExcitationLevelsBuffer());
 	m_kernel.setArg(1, m_excitationFactor);

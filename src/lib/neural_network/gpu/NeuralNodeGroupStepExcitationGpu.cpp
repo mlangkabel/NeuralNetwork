@@ -1,12 +1,12 @@
-#include "neural_network/NeuralNodeGroupStepExcitation.h"
+#include "neural_network/gpu/NeuralNodeGroupStepExcitationGpu.h"
 
 #include "tinyxml/tinyxml.h"
 
 #include "utility/cl/ClSystem.h"
 
-std::shared_ptr<NeuralNodeGroupStepExcitation> NeuralNodeGroupStepExcitation::loadFromXmlElement(const TiXmlElement* element)
+std::shared_ptr<NeuralNodeGroupStepExcitationGpu> NeuralNodeGroupStepExcitationGpu::loadFromXmlElement(const TiXmlElement* element)
 {
-	std::shared_ptr<NeuralNodeGroupStepExcitation> nodeGroup;
+	std::shared_ptr<NeuralNodeGroupStepExcitationGpu> nodeGroup;
 	if (element)
 	{
 		if (std::string(element->Value()) != "node_group_step_excitation")
@@ -38,13 +38,13 @@ std::shared_ptr<NeuralNodeGroupStepExcitation> NeuralNodeGroupStepExcitation::lo
 			return nodeGroup;
 		}
 
-		nodeGroup = std::make_shared<NeuralNodeGroupStepExcitation>(id, nodeCount, excitationThreshold, excitationFatigue);
+		nodeGroup = std::make_shared<NeuralNodeGroupStepExcitationGpu>(id, nodeCount, excitationThreshold, excitationFatigue);
 	}
 	return nodeGroup;
 }
 
-NeuralNodeGroupStepExcitation::NeuralNodeGroupStepExcitation(const Id id, const int nodeCount, const float excitationThreshold, const float excitationFatigue)
-	: NeuralNodeGroup(id, nodeCount)
+NeuralNodeGroupStepExcitationGpu::NeuralNodeGroupStepExcitationGpu(const Id id, const int nodeCount, const float excitationThreshold, const float excitationFatigue)
+	: NeuralNodeGroupGpu(id, nodeCount)
 	, m_excitationThreshold(excitationThreshold)
 	, m_excitationFatigue(excitationFatigue)
 {
@@ -68,17 +68,17 @@ NeuralNodeGroupStepExcitation::NeuralNodeGroupStepExcitation(const Id id, const 
 	}
 }
 
-float NeuralNodeGroupStepExcitation::getExcitationThreshold() const
+float NeuralNodeGroupStepExcitationGpu::getExcitationThreshold() const
 {
 	return m_excitationThreshold;
 }
 
-float NeuralNodeGroupStepExcitation::getExcitationFatigue() const
+float NeuralNodeGroupStepExcitationGpu::getExcitationFatigue() const
 {
 	return m_excitationFatigue;
 }
 
-void NeuralNodeGroupStepExcitation::update()
+void NeuralNodeGroupStepExcitationGpu::update()
 {
 	m_kernel.setArg(0, getExcitationLevelsBuffer());
 	m_kernel.setArg(1, m_excitationThreshold);

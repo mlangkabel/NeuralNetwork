@@ -2,10 +2,10 @@
 
 #include "tinyxml/tinyxml.h"
 
-#include "neural_network/NeuralNodeGroupLinearExcitation.h"
-#include "neural_network/NeuralNodeGroupStepExcitation.h"
+#include "neural_network/gpu/NeuralNodeGroupLinearExcitationGpu.h"
+#include "neural_network/gpu/NeuralNodeGroupStepExcitationGpu.h"
 
-class NeuralNodeGroupTestSuite : public CxxTest::TestSuite
+class NeuralNodeGroupGpuTestSuite : public CxxTest::TestSuite
 {
 public:
 	void test_node_group_linear_excitation_can_be_loaded_from_xml_element()
@@ -18,7 +18,7 @@ public:
 		);
 
 		const TiXmlElement* element = doc.FirstChildElement("node_group_linear_excitation");
-		std::shared_ptr<NeuralNodeGroupLinearExcitation> nodeGroup = NeuralNodeGroupLinearExcitation::loadFromXmlElement(element);
+		std::shared_ptr<NeuralNodeGroupLinearExcitationGpu> nodeGroup = NeuralNodeGroupLinearExcitationGpu::loadFromXmlElement(element);
 
 		TS_ASSERT(nodeGroup);
 
@@ -32,7 +32,7 @@ public:
 
 	void test_node_group_stores_set_excitation_levels_correctly()
 	{
-		NeuralNodeGroupLinearExcitation nodeGroup(1, 5, 1.0f);
+		NeuralNodeGroupLinearExcitationGpu nodeGroup(1, 5, 1.0f);
 
 		const std::vector<float> excitationLevels = { -1.0f, 2.3f, 0.1f, 11.0f, -5.6f };
 
@@ -43,7 +43,7 @@ public:
 
 	void test_node_group_fails_to_set_excitation_levels_if_count_does_not_match()
 	{
-		NeuralNodeGroupLinearExcitation nodeGroup(1, 1, 1.0f);
+		NeuralNodeGroupLinearExcitationGpu nodeGroup(1, 1, 1.0f);
 
 		const std::vector<float> excitationLevels = { -1.0f, 2.3f };
 
@@ -54,7 +54,7 @@ public:
 
 	void test_node_group_linear_excitation_updates_excitation_state_correctly()
 	{
-		NeuralNodeGroupLinearExcitation nodeGroup(1, 2, 0.5f);
+		NeuralNodeGroupLinearExcitationGpu nodeGroup(1, 2, 0.5f);
 
 		const std::vector<float> excitationLevels = { -1.0f, 2.2f };
 		const std::vector<float> expectedExcitationStates = { -0.5f, 1.1f };
@@ -76,7 +76,7 @@ public:
 		);
 
 		const TiXmlElement* element = doc.FirstChildElement("node_group_step_excitation");
-		std::shared_ptr<NeuralNodeGroupStepExcitation> nodeGroup = NeuralNodeGroupStepExcitation::loadFromXmlElement(element);
+		std::shared_ptr<NeuralNodeGroupStepExcitationGpu> nodeGroup = NeuralNodeGroupStepExcitationGpu::loadFromXmlElement(element);
 
 		TS_ASSERT(nodeGroup);
 
@@ -91,7 +91,7 @@ public:
 
 	void test_node_group_step_excitation_updates_excitation_state_correctly()
 	{
-		NeuralNodeGroupStepExcitation nodeGroup(1, 4, 0.5f, 0.0f);
+		NeuralNodeGroupStepExcitationGpu nodeGroup(1, 4, 0.5f, 0.0f);
 
 		const std::vector<float> excitationLevels = { -1.0f, 0.49f, 0.51f, 0.6f };
 		const std::vector<float> expectedExcitationStates = { 0.0f, 0.0f, 1.0f, 1.0f };
@@ -105,7 +105,7 @@ public:
 
 	void test_node_group_step_excitation_with_no_fatigue_maintains_excitation_levels()
 	{
-		NeuralNodeGroupStepExcitation nodeGroup(1, 4, 0.5f, 0.0f);
+		NeuralNodeGroupStepExcitationGpu nodeGroup(1, 4, 0.5f, 0.0f);
 
 		const std::vector<float> excitationLevels = { -1.0f, 0.49f, 0.51f, 0.6f };
 
@@ -118,7 +118,7 @@ public:
 
 	void test_node_group_step_excitation_with_full_fatigue_discards_excitation_levels_for_excited_nodes()
 	{
-		NeuralNodeGroupStepExcitation nodeGroup(1, 4, 0.5f, 1.0f);
+		NeuralNodeGroupStepExcitationGpu nodeGroup(1, 4, 0.5f, 1.0f);
 
 		const std::vector<float> excitationLevels = { -1.0f, 0.49f, 0.51f, 0.6f };
 		const std::vector<float> expectedExcitationLevels = { -1.0f, 0.49f, 0.0f, 0.0f };

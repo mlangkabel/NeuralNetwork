@@ -1,5 +1,5 @@
-#ifndef NEURAL_NODE_GROUP_H
-#define NEURAL_NODE_GROUP_H
+#ifndef NEURAL_NODE_GROUP_GPU_H
+#define NEURAL_NODE_GROUP_GPU_H
 
 #include <memory>
 #include <vector>
@@ -8,11 +8,11 @@
 
 #include "utility/types.h"
 
-class NeuralNodeGroup
+class NeuralNodeGroupGpu
 {
 public:
-	NeuralNodeGroup(const Id id, const int nodeCount);
-	virtual ~NeuralNodeGroup();
+	NeuralNodeGroupGpu(const Id id, const int nodeCount);
+	virtual ~NeuralNodeGroupGpu() = default;
 
 	Id getId() const;
 	int getNodeCount() const;
@@ -36,4 +36,4 @@ private:
 };
 
 
-#endif // NEURAL_NODE_GROUP_H
+#endif // NEURAL_NODE_GROUP_GPU_H

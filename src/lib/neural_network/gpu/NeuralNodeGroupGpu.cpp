@@ -1,9 +1,9 @@
-#include "neural_network/NeuralNodeGroup.h"
+#include "neural_network/gpu/NeuralNodeGroupGpu.h"
 
 #include "utility/cl/ClSystem.h"
 #include "utility/logging.h"
 
-NeuralNodeGroup::NeuralNodeGroup(const Id id, const int nodeCount)
+NeuralNodeGroupGpu::NeuralNodeGroupGpu(const Id id, const int nodeCount)
 	: m_id(id)
 	, m_nodeCount(nodeCount)
 	, m_excitationLevelsBuffer(ClSystem::getInstance()->getContext(), CL_MEM_READ_WRITE, sizeof(cl_float) * nodeCount)
@@ -11,31 +11,27 @@ NeuralNodeGroup::NeuralNodeGroup(const Id id, const int nodeCount)
 {
 }
 
-NeuralNodeGroup::~NeuralNodeGroup()
-{
-}
-
-Id NeuralNodeGroup::getId() const
+Id NeuralNodeGroupGpu::getId() const
 {
 	return m_id;
 }
 
-int NeuralNodeGroup::getNodeCount() const
+int NeuralNodeGroupGpu::getNodeCount() const
 {
 	return m_nodeCount;
 }
 
-cl::Buffer NeuralNodeGroup::getExcitationLevelsBuffer()
+cl::Buffer NeuralNodeGroupGpu::getExcitationLevelsBuffer()
 {
 	return m_excitationLevelsBuffer;
 }
 
-cl::Buffer NeuralNodeGroup::getExcitationStatesBuffer()
+cl::Buffer NeuralNodeGroupGpu::getExcitationStatesBuffer()
 {
 	return m_excitationStatesBuffer;
 }
 
-void NeuralNodeGroup::setExcitationLevels(std::vector<float> excitationLevels)
+void NeuralNodeGroupGpu::setExcitationLevels(std::vector<float> excitationLevels)
 {
 	if (excitationLevels.size() == m_nodeCount)
 	{
@@ -47,14 +43,14 @@ void NeuralNodeGroup::setExcitationLevels(std::vector<float> excitationLevels)
 	}
 }
 
-std::vector<float> NeuralNodeGroup::getExcitationLevels()
+std::vector<float> NeuralNodeGroupGpu::getExcitationLevels()
 {
 	std::vector<float> excitationLevels(m_nodeCount, 0.0f);
 	ClSystem::getInstance()->getQueue().enqueueReadBuffer(m_excitationLevelsBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &excitationLevels[0]);
 	return excitationLevels;
 }
 
-void NeuralNodeGroup::setExcitationStates(std::vector<float> excitationStates)
+void NeuralNodeGroupGpu::setExcitationStates(std::vector<float> excitationStates)
 {
 	if (excitationStates.size() == m_nodeCount)
 	{
@@ -66,7 +62,7 @@ void NeuralNodeGroup::setExcitationStates(std::vector<float> excitationStates)
 	}
 }
 
-std::vector<float> NeuralNodeGroup::getExcitationStates()
+std::vector<float> NeuralNodeGroupGpu::getExcitationStates()
 {
 	std::vector<float> excitationStates(m_nodeCount, 0.0f);
 	ClSystem::getInstance()->getQueue().enqueueReadBuffer(m_excitationStatesBuffer, CL_TRUE, 0, sizeof(cl_float) * m_nodeCount, &excitationStates[0]);

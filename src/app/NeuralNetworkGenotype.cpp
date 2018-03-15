@@ -1,9 +1,11 @@
 #include "NeuralNetworkGenotype.h"
 
-#include "neural_network/NeuralNetwork.h"
+#include "neural_network/gpu/NeuralNetworkGpu.h"
 #include "utility/random/RandomNumberGenerator.h"
 #include "utility/logging.h"
 #include "utility/utilityRandom.h"
+
+typedef NeuralNetworkGpu NeuralNetwork;
 
 NeuralNetworkGenotype::NeuralNetworkGenotype()
 	: inputNodeAmount(0)

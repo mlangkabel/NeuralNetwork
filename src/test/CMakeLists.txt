@@ -4,7 +4,7 @@ add_files(
 	
 	ClSystemTestSuite.h
 	MatrixTestSuite.h
-	NeuralEdgeGroupTestSuite.h
-	NeuralNetworkTestSuite.h
-	NeuralNodeGroupTestSuite.h
+	NeuralEdgeGroupGpuTestSuite.h
+	NeuralNetworkGpuTestSuite.h
+	NeuralNodeGroupGpuTestSuite.h
 )

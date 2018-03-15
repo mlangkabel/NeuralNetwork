@@ -1,12 +1,12 @@
-#include "neural_network/NeuralNetwork.h"
+#include "neural_network/gpu/NeuralNetworkGpu.h"
 
 #include "tinyxml/tinyxml.h"
 
-#include "neural_network/NeuralEdgeGroup.h"
-#include "neural_network/NeuralNodeGroupLinearExcitation.h"
-#include "neural_network/NeuralNodeGroupStepExcitation.h"
+#include "neural_network/gpu/NeuralEdgeGroupGpu.h"
+#include "neural_network/gpu/NeuralNodeGroupLinearExcitationGpu.h"
+#include "neural_network/gpu/NeuralNodeGroupStepExcitationGpu.h"
 
-std::shared_ptr<NeuralNetwork> NeuralNetwork::load(std::shared_ptr<const TextAccess> textAccess)
+std::shared_ptr<NeuralNetworkGpu> NeuralNetworkGpu::load(std::shared_ptr<const TextAccess> textAccess)
 {
 	TiXmlDocument doc;
 	doc.Parse(
@@ -19,20 +19,20 @@ std::shared_ptr<NeuralNetwork> NeuralNetwork::load(std::shared_ptr<const TextAcc
 
 	if (!elementNeuralNetwork)
 	{
-		return std::shared_ptr<NeuralNetwork>();
+		return std::shared_ptr<NeuralNetworkGpu>();
 	}
 
-	std::shared_ptr<NeuralNetwork> neuralNetwork = std::shared_ptr<NeuralNetwork>(new NeuralNetwork());
+	std::shared_ptr<NeuralNetworkGpu> neuralNetwork = std::shared_ptr<NeuralNetworkGpu>(new NeuralNetworkGpu());
 
 	{
 		const std::string elementName = "node_group_step_excitation";
 		const TiXmlElement* elementNodeGroup = elementNeuralNetwork->FirstChildElement(elementName.c_str());
 		while (elementNodeGroup)
 		{
-			std::shared_ptr<NeuralNodeGroup> nodeGroup = NeuralNodeGroupStepExcitation::loadFromXmlElement(elementNodeGroup);
+			std::shared_ptr<NeuralNodeGroupGpu> nodeGroup = NeuralNodeGroupStepExcitationGpu::loadFromXmlElement(elementNodeGroup);
 			if (!nodeGroup)
 			{
-				return std::shared_ptr<NeuralNetwork>();
+				return std::shared_ptr<NeuralNetworkGpu>();
 			}
 			neuralNetwork->m_nodeGroups.push_back(nodeGroup);
 			elementNodeGroup = elementNodeGroup->NextSiblingElement(elementName.c_str());
@@ -44,10 +44,10 @@ std::shared_ptr<NeuralNetwork> NeuralNetwork::load(std::shared_ptr<const TextAcc
 		const TiXmlElement* elementNodeGroup = elementNeuralNetwork->FirstChildElement(elementName.c_str());
 		while (elementNodeGroup)
 		{
-			std::shared_ptr<NeuralNodeGroup> nodeGroup = NeuralNodeGroupLinearExcitation::loadFromXmlElement(elementNodeGroup);
+			std::shared_ptr<NeuralNodeGroupGpu> nodeGroup = NeuralNodeGroupLinearExcitationGpu::loadFromXmlElement(elementNodeGroup);
 			if (!nodeGroup)
 			{
-				return std::shared_ptr<NeuralNetwork>();
+				return std::shared_ptr<NeuralNetworkGpu>();
 			}
 			neuralNetwork->m_nodeGroups.push_back(nodeGroup);
 			elementNodeGroup = elementNodeGroup->NextSiblingElement(elementName.c_str());
@@ -58,9 +58,9 @@ std::shared_ptr<NeuralNetwork> NeuralNetwork::load(std::shared_ptr<const TextAcc
 		int inputNodeGroupId = -1;
 		if (elementNeuralNetwork->QueryIntAttribute("input_node_group_id", &inputNodeGroupId) != TIXML_SUCCESS)
 		{
-			return std::shared_ptr<NeuralNetwork>();
+			return std::shared_ptr<NeuralNetworkGpu>();
 		}
-		for (std::shared_ptr<NeuralNodeGroup> nodeGroup : neuralNetwork->m_nodeGroups)
+		for (std::shared_ptr<NeuralNodeGroupGpu> nodeGroup : neuralNetwork->m_nodeGroups)
 		{
 			if (nodeGroup->getId() == inputNodeGroupId)
 			{
@@ -68,21 +68,29 @@ std::shared_ptr<NeuralNetwork> NeuralNetwork::load(std::shared_ptr<const TextAcc
 				break;
 			}
 		}
+		if (!neuralNetwork->m_inputNodeGroup)
+		{
+			return std::shared_ptr<NeuralNetworkGpu>();
+		}
 	}
 
 	{
 		int outputNodeGroupId = -1;
 		if (elementNeuralNetwork->QueryIntAttribute("output_node_group_id", &outputNodeGroupId) != TIXML_SUCCESS)
 		{
-			return std::shared_ptr<NeuralNetwork>();
+			return std::shared_ptr<NeuralNetworkGpu>();
 		}
-		for (std::shared_ptr<NeuralNodeGroup> nodeGroup : neuralNetwork->m_nodeGroups)
+		for (std::shared_ptr<NeuralNodeGroupGpu> nodeGroup : neuralNetwork->m_nodeGroups)
 		{
 			if (nodeGroup->getId() == outputNodeGroupId)
 			{
 				neuralNetwork->m_outputNodeGroup = nodeGroup;
 				break;
 			}
+		}
+		if (!neuralNetwork->m_outputNodeGroup)
+		{
+			return std::shared_ptr<NeuralNetworkGpu>();
 		}
 	}
 
@@ -91,10 +99,10 @@ std::shared_ptr<NeuralNetwork> NeuralNetwork::load(std::shared_ptr<const TextAcc
 		const TiXmlElement* elementEdgeGroup = elementNeuralNetwork->FirstChildElement(elementName.c_str());
 		while (elementEdgeGroup)
 		{
-			std::shared_ptr<NeuralEdgeGroup> edgeGroup = NeuralEdgeGroup::loadFromXmlElement(elementEdgeGroup, neuralNetwork->m_nodeGroups);
+			std::shared_ptr<NeuralEdgeGroupGpu> edgeGroup = NeuralEdgeGroupGpu::loadFromXmlElement(elementEdgeGroup, neuralNetwork->m_nodeGroups);
 			if (!edgeGroup)
 			{
-				return std::shared_ptr<NeuralNetwork>();
+				return std::shared_ptr<NeuralNetworkGpu>();
 			}
 			neuralNetwork->m_edgeGroups.push_back(edgeGroup);
 			elementEdgeGroup = elementEdgeGroup->NextSiblingElement(elementName.c_str());
@@ -104,28 +112,24 @@ std::shared_ptr<NeuralNetwork> NeuralNetwork::load(std::shared_ptr<const TextAcc
 	return neuralNetwork;
 }
 
-void NeuralNetwork::setInputExcitationLevels(std::vector<float> excitationLevels)
+void NeuralNetworkGpu::setInputExcitationLevels(std::vector<float> excitationLevels)
 {
 	m_inputNodeGroup->setExcitationLevels(excitationLevels);
 }
 
-std::vector<float> NeuralNetwork::getOutputExcitationStates()
+std::vector<float> NeuralNetworkGpu::getOutputExcitationStates()
 {
 	return m_outputNodeGroup->getExcitationStates();
 }
 
-void NeuralNetwork::update()
+void NeuralNetworkGpu::update()
 {
-	for (std::shared_ptr<NeuralNodeGroup> nodeGroup : m_nodeGroups)
+	for (std::shared_ptr<NeuralNodeGroupGpu> nodeGroup : m_nodeGroups)
 	{
 		nodeGroup->update();
 	}
-	for (std::shared_ptr<NeuralEdgeGroup> edgeGroup : m_edgeGroups)
+	for (std::shared_ptr<NeuralEdgeGroupGpu> edgeGroup : m_edgeGroups)
 	{
 		edgeGroup->update();
 	}
-}
-
-NeuralNetwork::NeuralNetwork()
-{
 }

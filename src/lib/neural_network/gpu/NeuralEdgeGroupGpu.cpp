@@ -1,15 +1,15 @@
-#include "neural_network/NeuralEdgeGroup.h"
+#include "neural_network/gpu/NeuralEdgeGroupGpu.h"
 
 #include "tinyxml/tinyxml.h"
 
-#include "neural_network/NeuralNodeGroup.h"
+#include "neural_network/gpu/NeuralNodeGroupGpu.h"
 #include "utility/cl/ClSystem.h"
 #include "utility/logging.h"
 #include "utility/utilityString.h"
 
-std::shared_ptr<NeuralEdgeGroup> NeuralEdgeGroup::loadFromXmlElement(const TiXmlElement* element, const std::vector<std::shared_ptr<NeuralNodeGroup>>& nodeGroups)
+std::shared_ptr<NeuralEdgeGroupGpu> NeuralEdgeGroupGpu::loadFromXmlElement(const TiXmlElement* element, const std::vector<std::shared_ptr<NeuralNodeGroupGpu>>& nodeGroups)
 {
-	std::shared_ptr<NeuralEdgeGroup> nodeGroup;
+	std::shared_ptr<NeuralEdgeGroupGpu> nodeGroup;
 	if (element)
 	{
 		if (std::string(element->Value()) != "edge_group")
@@ -35,9 +35,9 @@ std::shared_ptr<NeuralEdgeGroup> NeuralEdgeGroup::loadFromXmlElement(const TiXml
 			return nodeGroup;
 		}
 
-		std::shared_ptr<NeuralNodeGroup> sourceNodes;
-		std::shared_ptr<NeuralNodeGroup> targetNodes;
-		for (const std::shared_ptr<NeuralNodeGroup>& nodeGroup : nodeGroups)
+		std::shared_ptr<NeuralNodeGroupGpu> sourceNodes;
+		std::shared_ptr<NeuralNodeGroupGpu> targetNodes;
+		for (const std::shared_ptr<NeuralNodeGroupGpu>& nodeGroup : nodeGroups)
 		{
 			if (nodeGroup->getId() == sourceGroupId)
 			{
@@ -56,16 +56,16 @@ std::shared_ptr<NeuralEdgeGroup> NeuralEdgeGroup::loadFromXmlElement(const TiXml
 			{
 				return nodeGroup;
 			}
-			nodeGroup = std::make_shared<NeuralEdgeGroup>(sourceNodes, targetNodes);
+			nodeGroup = std::make_shared<NeuralEdgeGroupGpu>(sourceNodes, targetNodes);
 			nodeGroup->setWeights(weights);
 		}
 	}
 	return nodeGroup;
 }
 
-NeuralEdgeGroup::NeuralEdgeGroup(
-	std::shared_ptr<NeuralNodeGroup> sourceNodes, 
-	std::shared_ptr<NeuralNodeGroup> targetNodes
+NeuralEdgeGroupGpu::NeuralEdgeGroupGpu(
+	std::shared_ptr<NeuralNodeGroupGpu> sourceNodes, 
+	std::shared_ptr<NeuralNodeGroupGpu> targetNodes
 )
 	: m_sourceNodes(sourceNodes)
 	, m_targetNodes(targetNodes)
@@ -91,7 +91,7 @@ NeuralEdgeGroup::NeuralEdgeGroup(
 	}
 }
 
-void NeuralEdgeGroup::setWeights(Matrix<float> weights)
+void NeuralEdgeGroupGpu::setWeights(Matrix<float> weights)
 {
 	if (weights.getWidth() == m_sourceNodes->getNodeCount() && weights.getHeight() == m_targetNodes->getNodeCount())
 	{
@@ -103,14 +103,14 @@ void NeuralEdgeGroup::setWeights(Matrix<float> weights)
 	}
 }
 
-Matrix<float> NeuralEdgeGroup::getWeights()
+Matrix<float> NeuralEdgeGroupGpu::getWeights()
 {
 	Matrix<float> weights(m_sourceNodes->getNodeCount(), m_targetNodes->getNodeCount());
 	ClSystem::getInstance()->getQueue().enqueueReadBuffer(m_weightsBuffer, CL_TRUE, 0, sizeof(cl_float) * weights.getElementCount(), &weights[0]);
 	return weights;
 }
 
-void NeuralEdgeGroup::update()
+void NeuralEdgeGroupGpu::update()
 {
 	m_kernel.setArg(0, m_sourceNodes->getNodeCount());
 	m_kernel.setArg(1, m_sourceNodes->getExcitationStatesBuffer());
