@@ -13,30 +13,46 @@
 
 int main()
 {
-	const int populationSize = 10;
+	const int populationSize = 50;
 	const int offspringSize = 10;
-	const int generationCount = 2;
 
 	if (!ClSystem::getInstance())
 	{
 		return EXIT_FAILURE;
 	}
 
-	NeuroEvolutionEnvironment evolutionEnvironment(populationSize, offspringSize, 0.1f);
+	NeuroEvolutionEnvironment evolutionEnvironment(populationSize, offspringSize, 0.3f);
 	for (int i = 0; i < populationSize; i++)
 	{
-		evolutionEnvironment.addGenotype(createRandomNeuralNetworkGenotype(10));
+		evolutionEnvironment.addGenotype(createRandomNeuralNetworkGenotype(20));
 	}
 
-	for (int i = 0; i < generationCount; i++)
-	{
-		evolutionEnvironment.processGeneration();
-		LOG_INFO("Generations processed: " + std::to_string(evolutionEnvironment.getGenerationCount()));
-	}
+	bool running = true;
+
+	std::thread thread([&]() {
+		while (running)
+		{
+			evolutionEnvironment.processGeneration();
+			LOG_INFO(
+				"Generations processed: " + std::to_string(evolutionEnvironment.getGenerationCount()) +
+				" Highest Fitness: " + std::to_string(evolutionEnvironment.getHighestFitness())
+			);
+		}
+	});
+
+	system("pause");
+
+	running = false;
+
+	thread.join();
 
 	LOG_INFO("Done. Highest score: " + std::to_string(evolutionEnvironment.getHighestFitness()));
 	NeuralNetworkGenotype genotype = evolutionEnvironment.getGenotypeWithHighestFittness();
-	runPingEvaluation(genotype, true);
+	runPingEvaluation(genotype, 0, true);
+	runPingEvaluation(genotype, 1, true);
+	runPingEvaluation(genotype, 2, true);
+	runPingEvaluation(genotype, 3, true);
+	runPingEvaluation(genotype, 4, true);
 
 	return EXIT_SUCCESS;
 }

@@ -18,6 +18,7 @@ public:
 	int getHeight() const;
 	int getElementCount() const;
 
+	const T& operator[](size_t pos) const;
 	T& operator[](size_t pos);
 
 	void setValues(const T value);
@@ -104,6 +105,12 @@ template <typename T>
 int Matrix<T>::getElementCount() const
 {
 	return m_width * m_height;
+}
+
+template <typename T>
+const T& Matrix<T>::operator[](size_t pos) const
+{
+	return m_values[pos];
 }
 
 template <typename T>

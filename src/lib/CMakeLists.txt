@@ -5,6 +5,17 @@ add_files(
 	evolution/EvaluatedGenotype.h
 	evolution/EvolutionEnvironment.h
 	
+	neural_network/cpu/NeuralEdgeGroupCpu.cpp
+	neural_network/cpu/NeuralEdgeGroupCpu.h
+	neural_network/cpu/NeuralNetworkCpu.cpp
+	neural_network/cpu/NeuralNetworkCpu.h
+	neural_network/cpu/NeuralNodeGroupCpu.cpp
+	neural_network/cpu/NeuralNodeGroupCpu.h
+	neural_network/cpu/NeuralNodeGroupLinearExcitationCpu.cpp
+	neural_network/cpu/NeuralNodeGroupLinearExcitationCpu.h
+	neural_network/cpu/NeuralNodeGroupStepExcitationCpu.cpp
+	neural_network/cpu/NeuralNodeGroupStepExcitationCpu.h
+	
 	neural_network/gpu/NeuralEdgeGroupGpu.cpp
 	neural_network/gpu/NeuralEdgeGroupGpu.h
 	neural_network/gpu/NeuralNetworkGpu.cpp

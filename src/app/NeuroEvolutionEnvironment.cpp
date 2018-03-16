@@ -9,7 +9,33 @@ NeuroEvolutionEnvironment::NeuroEvolutionEnvironment(int populatioSize, int offs
 
 NeuralNetworkGenotype NeuroEvolutionEnvironment::crossover(const NeuralNetworkGenotype& genotype1, const NeuralNetworkGenotype& genotype2)
 {
-	return genotype1;
+	const float preferabilityGenotype1 = utility::getRandomFloat(0.2f, 0.8f);
+	const float preferabilityGenotype2 = 1.0f - preferabilityGenotype1;
+	
+	NeuralNetworkGenotype mergedGenotype = genotype1;
+
+	for (int i = 0; i < mergedGenotype.inputToHiddenNodeWeights.getElementCount(); i++)
+	{
+		mergedGenotype.inputToHiddenNodeWeights[i] =
+			genotype1.inputToHiddenNodeWeights[i] * preferabilityGenotype1 +
+			genotype2.inputToHiddenNodeWeights[i] * preferabilityGenotype2;
+	}
+
+	for (int i = 0; i < mergedGenotype.hiddenToHiddenNodeWeights.getElementCount(); i++)
+	{
+		mergedGenotype.hiddenToHiddenNodeWeights[i] =
+			genotype1.hiddenToHiddenNodeWeights[i] * preferabilityGenotype1 +
+			genotype2.hiddenToHiddenNodeWeights[i] * preferabilityGenotype2;
+	}
+
+	for (int i = 0; i < mergedGenotype.hiddenToOutputNodeWeights.getElementCount(); i++)
+	{
+		mergedGenotype.hiddenToOutputNodeWeights[i] =
+			genotype1.hiddenToOutputNodeWeights[i] * preferabilityGenotype1 +
+			genotype2.hiddenToOutputNodeWeights[i] * preferabilityGenotype2;
+	}
+
+	return mergedGenotype;
 }
 
 NeuralNetworkGenotype NeuroEvolutionEnvironment::mutate(const NeuralNetworkGenotype& genotype)
@@ -31,7 +57,7 @@ NeuralNetworkGenotype NeuroEvolutionEnvironment::mutate(const NeuralNetworkGenot
 
 float NeuroEvolutionEnvironment::evaluate(const NeuralNetworkGenotype& genotype)
 {
-	const int repetitions = 10;
+	const int repetitions = 30;
 	float score = 0.0f;
 	for (int i = 0; i < repetitions; i++)
 	{

@@ -1,11 +1,11 @@
 #include "NeuralNetworkGenotype.h"
 
-#include "neural_network/gpu/NeuralNetworkGpu.h"
+#include "neural_network/cpu/NeuralNetworkCpu.h"
 #include "utility/random/RandomNumberGenerator.h"
 #include "utility/logging.h"
 #include "utility/utilityRandom.h"
 
-typedef NeuralNetworkGpu NeuralNetwork;
+typedef NeuralNetworkCpu NeuralNetwork;
 
 NeuralNetworkGenotype::NeuralNetworkGenotype()
 	: inputNodeAmount(0)
@@ -29,7 +29,7 @@ NeuralNetworkGenotype::NeuralNetworkGenotype(int inputNodeAmount, int hiddenNode
 
 NeuralNetworkGenotype createRandomNeuralNetworkGenotype(int hiddenNodeAmount)
 {
-	const int inputNodeAmount = 2;
+	const int inputNodeAmount = 3;
 	const int outputNodeAmount = 5;
 
 	NeuralNetworkGenotype genotype(inputNodeAmount, hiddenNodeAmount, outputNodeAmount);
@@ -82,13 +82,15 @@ std::string neuralNetworkGenotypeToXml(NeuralNetworkGenotype genotype)
 
 float runPingEvaluation(NeuralNetworkGenotype genotype, bool verbose)
 {
+	return runPingEvaluation(genotype, utility::getRandomInt(0, genotype.outputNodeAmount - 1), verbose);
+}
+
+float runPingEvaluation(NeuralNetworkGenotype genotype, const int nunmberOfPings, bool verbose)
+{
 	if (verbose)
 	{
 		LOG_INFO("Running Ping Evaluation");
 	}
-
-
-	const int nunmberOfPings = utility::getRandomInt(0, genotype.outputNodeAmount - 1);
 
 	if (verbose)
 	{
@@ -104,8 +106,8 @@ float runPingEvaluation(NeuralNetworkGenotype genotype, bool verbose)
 
 	for (int i = 0; i < nunmberOfPings; i++)
 	{
-		const int silenceDuration = utility::getRandomInt(5, 50);
-		const int pingDuration = utility::getRandomInt(5, 20);
+		const int silenceDuration = utility::getRandomInt(10, 30);
+		const int pingDuration = utility::getRandomInt(10, 20);
 
 		if (verbose)
 		{
@@ -115,19 +117,19 @@ float runPingEvaluation(NeuralNetworkGenotype genotype, bool verbose)
 
 		for (int j = 0; j < silenceDuration; j++)
 		{
-			neuralNetwork->setInputExcitationLevels(addNoise({ 0.0f, 0.0f }));
+			neuralNetwork->setInputExcitationLevels(addNoise({ 0.0f, 0.0f, 1.0f }));
 			neuralNetwork->update();
 		}
 
 		for (int j = 0; j < pingDuration; j++)
 		{
-			neuralNetwork->setInputExcitationLevels(addNoise({ 1.0f, 0.0f }));
+			neuralNetwork->setInputExcitationLevels(addNoise({ 1.0f, 0.0f, 1.0f }));
 			neuralNetwork->update();
 		}
 	}
 
 	{
-		const int silenceDuration = utility::getRandomInt(5, 50);
+		const int silenceDuration = utility::getRandomInt(10, 30);
 
 		if (verbose)
 		{
@@ -136,7 +138,7 @@ float runPingEvaluation(NeuralNetworkGenotype genotype, bool verbose)
 
 		for (int j = 0; j < silenceDuration; j++)
 		{
-			neuralNetwork->setInputExcitationLevels(addNoise({ 0.0f, 0.0f }));
+			neuralNetwork->setInputExcitationLevels(addNoise({ 0.0f, 0.0f, 1.0f }));
 			neuralNetwork->update();
 		}
 	}
@@ -153,13 +155,13 @@ float runPingEvaluation(NeuralNetworkGenotype genotype, bool verbose)
 
 		for (int j = 0; j < answerDuration; j++)
 		{
-			neuralNetwork->setInputExcitationLevels(addNoise({ 0.0f, 1.0f }));
+			neuralNetwork->setInputExcitationLevels(addNoise({ 0.0f, 1.0f, 1.0f }));
 			neuralNetwork->update();
 			const std::vector<float> output = neuralNetwork->getOutputExcitationStates();
 
 			int answer = -1;
 			float answerExcitationState = -std::numeric_limits<float>::infinity();
-			for (int i = 0; i < output .size(); i++)
+			for (int i = 0; i < output.size(); i++)
 			{
 				if (output[i] > answerExcitationState)
 				{
@@ -167,6 +169,24 @@ float runPingEvaluation(NeuralNetworkGenotype genotype, bool verbose)
 					answerExcitationState = output[i];
 				}
 			}
+
+			//if (verbose)
+			//{
+			//	std::string visualAnswer = "";
+			//	for (int i = 0; i < output.size(); i++)
+			//	{
+			//		if (i == answer)
+			//		{
+			//			visualAnswer += "[x]";
+			//		}
+			//		else
+			//		{
+			//			visualAnswer += "[o]";
+			//		}
+			//	}
+			//	LOG_INFO("Answer: " + visualAnswer);
+			//}
+
 			if (answer == nunmberOfPings)
 			{
 				score += 1.0f;

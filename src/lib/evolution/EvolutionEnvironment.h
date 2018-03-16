@@ -120,7 +120,8 @@ void EvolutionEnvironment<GenotypeType>::processGeneration()
 		const float minFitness = getMinFitness();
 		for (const EvaluatedGenotype<GenotypeType>& candidate : m_population)
 		{
-			potentialParents.addResult(candidate.genotype, candidate.fitness - minFitness + 0.1f);
+			const float fitness = candidate.fitness - minFitness + 0.1f;
+			potentialParents.addResult(candidate.genotype, fitness * fitness);
 		}
 	}
 
@@ -142,7 +143,8 @@ void EvolutionEnvironment<GenotypeType>::processGeneration()
 		WeightedRandomGenerator<EvaluatedGenotype<GenotypeType>> potentialNextGeneration(m_randomNumberGenerator.getInt(0, 1000000));
 		for (const EvaluatedGenotype<GenotypeType>& candidate : m_population)
 		{
-			potentialNextGeneration.addResult(candidate, candidate.fitness - minFitness + 0.1f);
+			const float fitness = candidate.fitness - minFitness + 0.1f;
+			potentialNextGeneration.addResult(candidate, fitness * fitness);
 		}
 
 		m_population = potentialNextGeneration.getResults(m_populationSize, false);

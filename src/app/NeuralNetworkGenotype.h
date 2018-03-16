@@ -23,6 +23,7 @@ NeuralNetworkGenotype createRandomNeuralNetworkGenotype(int hiddenNodeAmount);
 std::string neuralNetworkGenotypeToXml(NeuralNetworkGenotype genotype);
 
 float runPingEvaluation(NeuralNetworkGenotype genotype, bool verbose);
+float runPingEvaluation(NeuralNetworkGenotype genotype, const int nunmberOfPings, bool verbose);
 std::vector<float>& addNoise(std::vector<float>& vec);
 std::vector<float> addNoise(const std::vector<float>& vec);
 
