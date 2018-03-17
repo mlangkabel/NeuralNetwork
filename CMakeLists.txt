@@ -56,6 +56,21 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/app)
 
 add_subdirectory(src/app)
 
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
+
+# Find the QtWidgets library
+set(CMAKE_PREFIX_PATH "$ENV{QT_WIN32_DIR}/")
+
+find_package(Qt5Widgets)
+if(Qt5Widgets_FOUND)
+	MESSAGE(STATUS "Found Qt ${Qt5Widgets_VERSION_STRING}")
+	# FIX: Qt was built with -reduce-relocations
+	if (Qt5_POSITION_INDEPENDENT_CODE)
+		SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+	endif()
+endif()
+
 add_executable(${APP_PROJECT_NAME} ${APP_FILES})
 
 create_source_groups(${APP_FILES})
@@ -76,6 +91,11 @@ set_property(
 		"${CMAKE_SOURCE_DIR}/src/app"
 		"${CMAKE_SOURCE_DIR}/src/lib"
 )
+
+# Use the Widgets module from Qt 5.
+qt5_use_modules(${APP_PROJECT_NAME} Widgets)
+
+set(CMAKE_AUTOMOC OFF)
 
 
 # Test -------------------------------------------------------------------------
