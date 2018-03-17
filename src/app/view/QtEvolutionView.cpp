@@ -32,31 +32,130 @@ QtEvolutionView::QtEvolutionView(QWidget* parent)
 				layoutVert2->addWidget(m_statusLabel);
 			}
 			{
-				QPushButton* startEvolutionButton = new QPushButton();
-				startEvolutionButton->setText("Start");
-				connect(
-					startEvolutionButton, &QPushButton::clicked,
-					this, &QtEvolutionView::onStartEvolutionClicked
-				);
-				layoutVert2->addWidget(startEvolutionButton);
-			}
-			{
-				QPushButton* stopEvolutionButton = new QPushButton();
-				stopEvolutionButton->setText("Stop");
-				connect(
-					stopEvolutionButton, &QPushButton::clicked,
-					this, &QtEvolutionView::onStopEvolutionClicked
-				);
-				layoutVert2->addWidget(stopEvolutionButton);
+				QHBoxLayout* layoutHorz2 = new QHBoxLayout();
+				layoutVert2->addLayout(layoutHorz2);
+
+				{
+					m_startButton = new QPushButton();
+					m_startButton->setText("Start");
+					connect(
+						m_startButton, &QPushButton::clicked,
+						this, &QtEvolutionView::onStartClicked
+					);
+					layoutHorz2->addWidget(m_startButton);
+				}
+				{
+					m_stopButton = new QPushButton();
+					m_stopButton->setText("Stop");
+					connect(
+						m_stopButton, &QPushButton::clicked,
+						this, &QtEvolutionView::onStopClicked
+					);
+					layoutHorz2->addWidget(m_stopButton);
+				}
+				{
+					m_resetButton = new QPushButton();
+					m_resetButton->setText("Reset");
+					connect(
+						m_resetButton, &QPushButton::clicked,
+						this, &QtEvolutionView::onResetClicked
+					);
+					layoutHorz2->addWidget(m_resetButton);
+				}
+				{
+					m_continueButton = new QPushButton();
+					m_continueButton->setText("Continue");
+					connect(
+						m_continueButton, &QPushButton::clicked,
+						this, &QtEvolutionView::onContinueClicked
+					);
+					layoutHorz2->addWidget(m_continueButton);
+				}
 			}
 		}
 		{
 			layoutHorz1->addStretch();
 		}
 	}
+	updateButtonVisibility();
 }
 
-void QtEvolutionView::onStartEvolutionClicked(bool checked)
+QtEvolutionView::~QtEvolutionView()
+{
+	stopEvolution();
+}
+
+void QtEvolutionView::onStartClicked(bool checked)
+{
+	setupEvolutionEnvironment();
+	startEvolution();
+	updateButtonVisibility();
+}
+
+void QtEvolutionView::onStopClicked(bool checked)
+{
+	stopEvolution();
+	updateButtonVisibility();
+}
+
+void QtEvolutionView::onResetClicked(bool checked)
+{
+	m_evolutionEnvironment.reset();
+	updateButtonVisibility();
+}
+
+void QtEvolutionView::onContinueClicked(bool checked)
+{
+	startEvolution();
+	updateButtonVisibility();
+}
+
+void QtEvolutionView::updateButtonVisibility()
+{
+	if (m_evolutionEnvironment)
+	{
+		if (m_evolutionRunning)
+		{
+			m_startButton->setVisible(false);
+			m_stopButton->setVisible(true);
+			m_resetButton->setVisible(false);
+			m_continueButton->setVisible(false);
+		}
+		else
+		{
+			m_startButton->setVisible(false);
+			m_stopButton->setVisible(false);
+			m_resetButton->setVisible(true);
+			m_continueButton->setVisible(true);
+		}
+	}
+	else
+	{
+		m_startButton->setVisible(true);
+		m_stopButton->setVisible(false);
+		m_resetButton->setVisible(false);
+		m_continueButton->setVisible(false);
+	}
+}
+
+void QtEvolutionView::setupEvolutionEnvironment()
+{
+	const int populationSize = 50;
+	const int offspringSize = 10;
+
+	m_statusLabel->setText("Initializing population...");
+
+	m_evolutionEnvironment = std::make_shared<NeuroEvolutionEnvironment>(populationSize, offspringSize, 0.3f);
+
+	for (int i = 0; i < populationSize; i++)
+	{
+		m_evolutionEnvironment->addGenotype(createRandomNeuralNetworkGenotype(20));
+	}
+
+	m_statusLabel->setText("Population initialized.");
+}
+
+void QtEvolutionView::startEvolution()
 {
 	if (!m_evolutionRunning)
 	{
@@ -65,25 +164,13 @@ void QtEvolutionView::onStartEvolutionClicked(bool checked)
 		m_evolutionThread = std::make_shared<std::thread>(
 			[&]()
 			{
-				const int populationSize = 50;
-				const int offspringSize = 10;
-
-				NeuroEvolutionEnvironment evolutionEnvironment(populationSize, offspringSize, 0.3f);
-
-				m_statusLabel->setText("Initializing population...");
-
-				for (int i = 0; i < populationSize; i++)
-				{
-					evolutionEnvironment.addGenotype(createRandomNeuralNetworkGenotype(20));
-				}
-
 				while (m_evolutionRunning)
 				{
-					evolutionEnvironment.processGeneration();
+					m_evolutionEnvironment->processGeneration();
 					m_statusLabel->setText(
 						QString("Running evolution in generation %1 with highest fitness %2.")
-						.arg(evolutionEnvironment.getGenerationCount())
-						.arg(evolutionEnvironment.getHighestFitness())
+						.arg(m_evolutionEnvironment->getGenerationCount())
+						.arg(m_evolutionEnvironment->getHighestFitness())
 					);
 				}
 			}
@@ -91,7 +178,7 @@ void QtEvolutionView::onStartEvolutionClicked(bool checked)
 	}
 }
 
-void QtEvolutionView::onStopEvolutionClicked(bool checked)
+void QtEvolutionView::stopEvolution()
 {
 	if (m_evolutionRunning)
 	{
