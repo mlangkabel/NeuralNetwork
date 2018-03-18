@@ -63,6 +63,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_PREFIX_PATH "$ENV{QT_WIN32_DIR}/")
 
 find_package(Qt5Widgets)
+find_package(Qt5Charts)
 if(Qt5Widgets_FOUND)
 	MESSAGE(STATUS "Found Qt ${Qt5Widgets_VERSION_STRING}")
 	# FIX: Qt was built with -reduce-relocations
@@ -94,6 +95,7 @@ set_property(
 
 # Use the Widgets module from Qt 5.
 qt5_use_modules(${APP_PROJECT_NAME} Widgets)
+qt5_use_modules(${APP_PROJECT_NAME} Charts)
 
 set(CMAKE_AUTOMOC OFF)
 

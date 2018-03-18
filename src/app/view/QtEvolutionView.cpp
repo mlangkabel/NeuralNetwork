@@ -1,5 +1,10 @@
 #include "view/QtEvolutionView.h"
 
+#include <QBarCategoryAxis>
+#include <QBarSet>
+#include <QBarSeries>
+#include <QChart>
+#include <QChartView>
 #include <QGroupBox>
 #include <QPushButton>
 #include <QHBoxLayout>
@@ -7,6 +12,9 @@
 #include <QVBoxLayout>
 
 #include "NeuroEvolutionEnvironment.h"
+#include "utility/Histogram.h"
+#include "utility/QtThreadedFunctor.h"
+#include "utility/utilityRandom.h"
 
 QtEvolutionView::QtEvolutionView(QWidget* parent)
 	: QWidget(parent)
@@ -27,9 +35,69 @@ QtEvolutionView::QtEvolutionView(QWidget* parent)
 			layoutHorz1->addLayout(layoutVert2);
 
 			{
-				m_statusLabel = new QLabel();
-				m_statusLabel->setText("All systems ready.");
-				layoutVert2->addWidget(m_statusLabel);
+				QHBoxLayout* layoutHorz2 = new QHBoxLayout();
+				layoutVert2->addLayout(layoutHorz2);
+
+				{
+					QLabel* label = new QLabel();
+					label->setText("Status:");
+					layoutHorz2->addWidget(label);
+				}
+				layoutHorz2->addStretch();
+				{
+					m_statusLabel = new QLabel();
+					m_statusLabel->setText("All systems ready.");
+					layoutHorz2->addWidget(m_statusLabel);
+				}
+			}
+			{
+				QHBoxLayout* layoutHorz2 = new QHBoxLayout();
+				layoutVert2->addLayout(layoutHorz2);
+
+				{
+					QLabel* label = new QLabel();
+					label->setText("Generation:");
+					layoutHorz2->addWidget(label);
+				}
+				layoutHorz2->addStretch();
+				{
+					m_generationLabel = new QLabel();
+					m_generationLabel->setText("-");
+					layoutHorz2->addWidget(m_generationLabel);
+				}
+			}
+			{
+				QHBoxLayout* layoutHorz2 = new QHBoxLayout();
+				layoutVert2->addLayout(layoutHorz2);
+
+				{
+					QLabel* label = new QLabel();
+					label->setText("Maximum Fitness:");
+					layoutHorz2->addWidget(label);
+				}
+				layoutHorz2->addStretch();
+				{
+					m_fitnessLabel = new QLabel();
+					m_fitnessLabel->setText("-");
+					layoutHorz2->addWidget(m_fitnessLabel);
+				}
+			}
+			{
+				QHBoxLayout* layoutHorz2 = new QHBoxLayout();
+				layoutVert2->addLayout(layoutHorz2);
+
+				{
+					QLabel* label = new QLabel();
+					label->setText("Hidden Node Count:");
+					layoutHorz2->addWidget(label);
+				}
+				layoutHorz2->addStretch();
+				{
+					m_hiddenNodeCountBox = new QSpinBox();
+					m_hiddenNodeCountBox->setMinimum(1);
+					m_hiddenNodeCountBox->setMaximum(100);
+					layoutHorz2->addWidget(m_hiddenNodeCountBox);
+				}
 			}
 			{
 				QHBoxLayout* layoutHorz2 = new QHBoxLayout();
@@ -76,7 +144,24 @@ QtEvolutionView::QtEvolutionView(QWidget* parent)
 		{
 			layoutHorz1->addStretch();
 		}
+		{
+			QtCharts::QChart* chart = new QtCharts::QChart();
+			chart->setAnimationOptions(QtCharts::QChart::NoAnimation);
+			chart->legend()->hide();
+
+			m_chartView = new QtCharts::QChartView(chart);
+			m_chartView->setRenderHint(QPainter::Antialiasing);
+			m_chartView->setFixedWidth(800);
+			m_chartView->setSizePolicy(QSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Expanding));
+			layoutHorz1->addWidget(m_chartView);
+		}
 	}
+
+	connect(
+		this, &QtEvolutionView::requestUiUpdate,
+		this, &QtEvolutionView::updateUi
+	);
+	
 	updateButtonVisibility();
 }
 
@@ -85,8 +170,17 @@ QtEvolutionView::~QtEvolutionView()
 	stopEvolution();
 }
 
+void QtEvolutionView::updateUi()
+{
+	m_statusLabel->setText("Running evolution...");
+	m_generationLabel->setText(QString::number(m_evolutionEnvironment->getGenerationCount()));
+	m_fitnessLabel->setText(QString::number(m_evolutionEnvironment->getHighestFitness()));
+	updateHistogram();
+}
+
 void QtEvolutionView::onStartClicked(bool checked)
 {
+	m_hiddenNodeCountBox->setEnabled(false);
 	setupEvolutionEnvironment();
 	startEvolution();
 	updateButtonVisibility();
@@ -100,7 +194,12 @@ void QtEvolutionView::onStopClicked(bool checked)
 
 void QtEvolutionView::onResetClicked(bool checked)
 {
+	m_hiddenNodeCountBox->setEnabled(true);
+	m_generationLabel->setText("-");
+	m_fitnessLabel->setText("-");
+
 	m_evolutionEnvironment.reset();
+
 	updateButtonVisibility();
 }
 
@@ -141,7 +240,7 @@ void QtEvolutionView::updateButtonVisibility()
 void QtEvolutionView::setupEvolutionEnvironment()
 {
 	const int populationSize = 50;
-	const int offspringSize = 10;
+	const int offspringSize = 20;
 
 	m_statusLabel->setText("Initializing population...");
 
@@ -149,7 +248,7 @@ void QtEvolutionView::setupEvolutionEnvironment()
 
 	for (int i = 0; i < populationSize; i++)
 	{
-		m_evolutionEnvironment->addGenotype(createRandomNeuralNetworkGenotype(20));
+		m_evolutionEnvironment->addGenotype(createRandomNeuralNetworkGenotype(m_hiddenNodeCountBox->value()));
 	}
 
 	m_statusLabel->setText("Population initialized.");
@@ -167,11 +266,8 @@ void QtEvolutionView::startEvolution()
 				while (m_evolutionRunning)
 				{
 					m_evolutionEnvironment->processGeneration();
-					m_statusLabel->setText(
-						QString("Running evolution in generation %1 with highest fitness %2.")
-						.arg(m_evolutionEnvironment->getGenerationCount())
-						.arg(m_evolutionEnvironment->getHighestFitness())
-					);
+
+					emit requestUiUpdate();
 				}
 			}
 		);
@@ -196,5 +292,37 @@ void QtEvolutionView::stopEvolution()
 				m_statusLabel->setText("All systems ready.");
 			}
 		);
+	}
+}
+
+void QtEvolutionView::updateHistogram()
+{
+	if (m_evolutionEnvironment)
+	{
+		Histogram historgram = m_evolutionEnvironment->getFitnessHistogram(0.1f);
+
+		QStringList categories;
+		QtCharts::QBarSet* barSet = new QtCharts::QBarSet("");
+
+		for (const Histogram::Bin& bin : historgram.getSortedBins(0.0f, 1.0f))
+		{
+			categories << QString::number(bin.meanValue, 'g', 2);
+			*barSet << bin.count;
+		}
+
+		QtCharts::QChart* chart = m_chartView->chart();
+		chart->removeAllSeries();
+
+
+		QtCharts::QBarSeries* barSeries = new QtCharts::QBarSeries();
+		barSeries->append(barSet);
+
+		chart->addSeries(barSeries);
+
+		QtCharts::QBarCategoryAxis* axis = new QtCharts::QBarCategoryAxis();
+		axis->append(categories);
+
+		chart->createDefaultAxes();
+		chart->setAxisX(axis, barSeries);
 	}
 }

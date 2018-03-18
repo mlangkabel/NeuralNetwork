@@ -3,6 +3,7 @@
 
 #include "evolution/EvaluatedGenotype.h"
 #include "utility/random/WeightedRandomGenerator.h"
+#include "utility/Histogram.h"
 
 #include <vector>
 #include <memory>
@@ -20,6 +21,7 @@ public:
 	void addGenotype(GenotypeType genotype);
 
 	float getHighestFitness() const;
+	Histogram getFitnessHistogram(float binSize = 0.1f) const;
 	GenotypeType getGenotypeWithHighestFittness() const;
 	std::vector<GenotypeType> getPopulation() const;
 	int getGenerationCount() const;
@@ -70,6 +72,19 @@ float EvolutionEnvironment<GenotypeType>::getHighestFitness() const
 	}
 
 	return maxFitness;
+}
+
+template <typename GenotypeType>
+Histogram EvolutionEnvironment<GenotypeType>::getFitnessHistogram(float binSize = 0.1f) const
+{
+	Histogram histogram(binSize);
+
+	for (int i = 0; i < m_population.size(); i++)
+	{
+		histogram.addValue(m_population[i].fitness);
+	}
+
+	return histogram;
 }
 
 template <typename GenotypeType>

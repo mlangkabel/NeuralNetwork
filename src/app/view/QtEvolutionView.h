@@ -4,7 +4,9 @@
 #include <memory>
 #include <thread>
 
+#include <QChartView>
 #include <QLabel>
+#include <QSpinBox>
 #include <QPushButton>
 #include <QWidget>
 
@@ -19,6 +21,12 @@ public:
 	QtEvolutionView(QWidget* parent = 0);
 	~QtEvolutionView();
 
+signals:
+	void requestUiUpdate();
+
+private slots:
+	void updateUi();
+
 private:
 	void onStartClicked(bool checked);
 	void onStopClicked(bool checked);
@@ -30,6 +38,7 @@ private:
 	void setupEvolutionEnvironment();
 	void startEvolution();
 	void stopEvolution();
+	void updateHistogram();
 
 	bool m_evolutionRunning;
 	std::shared_ptr<std::thread> m_evolutionThread;
@@ -40,6 +49,10 @@ private:
 	QPushButton* m_resetButton;
 	QPushButton* m_continueButton;
 	QLabel* m_statusLabel;
+	QLabel* m_generationLabel;
+	QLabel* m_fitnessLabel;
+	QSpinBox* m_hiddenNodeCountBox;
+	QtCharts::QChartView* m_chartView;
 };
 
 #endif // QT_EVOLUTION_VIEW_H

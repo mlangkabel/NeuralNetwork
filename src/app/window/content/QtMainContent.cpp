@@ -13,7 +13,7 @@ QtMainContent::QtMainContent()
 
 void QtMainContent::populate(QWidget* parent)
 {
-	const int evolutionSlotCount = 6;
+	const int evolutionSlotCount = 5;
 	QVBoxLayout* layoutVert1 = new QVBoxLayout();
 	parent->setLayout(layoutVert1);
 
@@ -21,5 +21,4 @@ void QtMainContent::populate(QWidget* parent)
 	{
 		layoutVert1->addWidget(new QtEvolutionView());
 	}
-	layoutVert1->addStretch();
 }

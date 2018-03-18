@@ -29,9 +29,13 @@ add_files(
 	
 	utility/cl/ClSystem.cpp
 	utility/cl/ClSystem.h
+	
 	utility/random/RandomNumberGenerator.cpp
 	utility/random/RandomNumberGenerator.h
 	utility/random/WeightedRandomGenerator.h
+	
+	utility/Histogram.cpp
+	utility/Histogram.h
 	utility/logging.h
 	utility/Matrix.h
 	utility/Optional.h

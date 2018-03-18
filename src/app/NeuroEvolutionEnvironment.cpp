@@ -57,11 +57,15 @@ NeuralNetworkGenotype NeuroEvolutionEnvironment::mutate(const NeuralNetworkGenot
 
 float NeuroEvolutionEnvironment::evaluate(const NeuralNetworkGenotype& genotype)
 {
-	const int repetitions = 30;
+	const int repetitions = 3;
 	float score = 0.0f;
 	for (int i = 0; i < repetitions; i++)
 	{
-		score += runPingEvaluation(genotype, false);
+		score += runPingEvaluation(genotype, 0, false);
+		score += runPingEvaluation(genotype, 1, false);
+		score += runPingEvaluation(genotype, 2, false);
+		score += runPingEvaluation(genotype, 3, false);
+		score += runPingEvaluation(genotype, 4, false);
 	}
-	return score / repetitions;
+	return score / repetitions / 5.0f;
 }
