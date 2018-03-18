@@ -13,7 +13,6 @@
 
 #include "NeuroEvolutionEnvironment.h"
 #include "utility/Histogram.h"
-#include "utility/QtThreadedFunctor.h"
 #include "utility/utilityRandom.h"
 
 QtEvolutionView::QtEvolutionView(QWidget* parent)
