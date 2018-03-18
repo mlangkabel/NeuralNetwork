@@ -19,6 +19,6 @@ void QtMainContent::populate(QWidget* parent)
 
 	for (int i = 0; i < evolutionSlotCount; i++)
 	{
-		layoutVert1->addWidget(new QtEvolutionView());
+		layoutVert1->addWidget(new QtEvolutionView(i + 1));
 	}
 }

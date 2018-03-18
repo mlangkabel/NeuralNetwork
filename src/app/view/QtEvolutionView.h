@@ -18,7 +18,7 @@ class QtEvolutionView
 	Q_OBJECT
 
 public:
-	QtEvolutionView(QWidget* parent = 0);
+	QtEvolutionView(int id, QWidget* parent = 0);
 	~QtEvolutionView();
 
 signals:
@@ -40,6 +40,7 @@ private:
 	void stopEvolution();
 	void updateHistogram();
 
+	const int m_id;
 	bool m_evolutionRunning;
 	std::shared_ptr<std::thread> m_evolutionThread;
 	std::shared_ptr<NeuroEvolutionEnvironment> m_evolutionEnvironment;

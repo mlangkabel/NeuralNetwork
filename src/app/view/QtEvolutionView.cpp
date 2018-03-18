@@ -15,8 +15,9 @@
 #include "utility/Histogram.h"
 #include "utility/utilityRandom.h"
 
-QtEvolutionView::QtEvolutionView(QWidget* parent)
+QtEvolutionView::QtEvolutionView(int id, QWidget* parent)
 	: QWidget(parent)
+	, m_id(id)
 	, m_evolutionRunning(false)
 {
 	QVBoxLayout* layoutVert1 = new QVBoxLayout();
@@ -24,6 +25,7 @@ QtEvolutionView::QtEvolutionView(QWidget* parent)
 
 	{
 		QGroupBox* group = new QGroupBox();
+		group->setTitle(QString("Evolution Module %1").arg(m_id));
 		layoutVert1->addWidget(group);
 
 		QHBoxLayout* layoutHorz1 = new QHBoxLayout();
