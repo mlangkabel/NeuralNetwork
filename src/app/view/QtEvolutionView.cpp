@@ -11,13 +11,17 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
-#include "NeuroEvolutionEnvironment.h"
+#include "view/QtPopulationExchangeView.h"
+
 #include "utility/Histogram.h"
 #include "utility/utilityRandom.h"
 
-QtEvolutionView::QtEvolutionView(int id, QWidget* parent)
+#include "NeuroEvolutionEnvironment.h"
+
+QtEvolutionView::QtEvolutionView(int id, QtPopulationExchangeView* populationExchangeView, QWidget* parent)
 	: QWidget(parent)
 	, m_id(id)
+	, m_populationExchangeView(populationExchangeView)
 	, m_evolutionRunning(false)
 {
 	QVBoxLayout* layoutVert1 = new QVBoxLayout();
@@ -140,6 +144,24 @@ QtEvolutionView::QtEvolutionView(int id, QWidget* parent)
 					);
 					layoutHorz2->addWidget(m_continueButton);
 				}
+				{
+					m_exportPopulationButton = new QPushButton();
+					m_exportPopulationButton->setText("Export Polulation");
+					connect(
+						m_exportPopulationButton, &QPushButton::clicked,
+						this, &QtEvolutionView::onExportPopulationClicked
+					);
+					layoutHorz2->addWidget(m_exportPopulationButton);
+				}
+				{
+					m_importPopulationButton = new QPushButton();
+					m_importPopulationButton->setText("Import Polulation");
+					connect(
+						m_importPopulationButton, &QPushButton::clicked,
+						this, &QtEvolutionView::onImportPopulationClicked
+					);
+					layoutHorz2->addWidget(m_importPopulationButton);
+				}
 			}
 		}
 		{
@@ -210,6 +232,40 @@ void QtEvolutionView::onContinueClicked(bool checked)
 	updateButtonVisibility();
 }
 
+void QtEvolutionView::onExportPopulationClicked(bool checked)
+{
+	if (m_evolutionEnvironment)
+	{
+		m_populationExchangeView->addPopulation(
+			m_id, m_evolutionEnvironment->getHighestFitness(), m_evolutionEnvironment->getPopulation()
+		);
+	}
+}
+
+void QtEvolutionView::onImportPopulationClicked(bool checked)
+{
+	if (m_evolutionEnvironment)
+	{
+		std::vector<NeuralNetworkGenotype> population = m_populationExchangeView->getPopulation();
+		if (population.empty())
+		{
+			LOG_ERROR("Population to import is empty.");
+		}
+		else if (population.front().hiddenNodeAmount != m_hiddenNodeCountBox->value())
+		{
+			LOG_ERROR("Importing populationfailed because hidden node amount is mismatching.");
+		}
+		else
+		{
+			for (const NeuralNetworkGenotype& genotype : m_populationExchangeView->getPopulation())
+			{
+				m_evolutionEnvironment->addGenotype(genotype);
+			}
+			LOG_INFO("Population successfully imported.");
+		}
+	}
+}
+
 void QtEvolutionView::updateButtonVisibility()
 {
 	if (m_evolutionEnvironment)
@@ -220,6 +276,8 @@ void QtEvolutionView::updateButtonVisibility()
 			m_stopButton->setVisible(true);
 			m_resetButton->setVisible(false);
 			m_continueButton->setVisible(false);
+			m_exportPopulationButton->setVisible(false);
+			m_importPopulationButton->setVisible(false);
 		}
 		else
 		{
@@ -227,6 +285,8 @@ void QtEvolutionView::updateButtonVisibility()
 			m_stopButton->setVisible(false);
 			m_resetButton->setVisible(true);
 			m_continueButton->setVisible(true);
+			m_exportPopulationButton->setVisible(true);
+			m_importPopulationButton->setVisible(true);
 		}
 	}
 	else
@@ -235,6 +295,8 @@ void QtEvolutionView::updateButtonVisibility()
 		m_stopButton->setVisible(false);
 		m_resetButton->setVisible(false);
 		m_continueButton->setVisible(false);
+		m_exportPopulationButton->setVisible(false);
+		m_importPopulationButton->setVisible(false);
 	}
 }
 

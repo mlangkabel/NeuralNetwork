@@ -5,6 +5,7 @@
 #include <QGroupBox>
 
 #include "view/QtEvolutionView.h"
+#include "view/QtPopulationExchangeView.h"
 
 QtMainContent::QtMainContent()
 {
@@ -14,11 +15,22 @@ QtMainContent::QtMainContent()
 void QtMainContent::populate(QWidget* parent)
 {
 	const int evolutionSlotCount = 5;
-	QVBoxLayout* layoutVert1 = new QVBoxLayout();
-	parent->setLayout(layoutVert1);
 
-	for (int i = 0; i < evolutionSlotCount; i++)
+	QHBoxLayout* layoutHorz1 = new QHBoxLayout();
+	parent->setLayout(layoutHorz1);
+
+	QtPopulationExchangeView* populationExchangeView = new QtPopulationExchangeView();
+
 	{
-		layoutVert1->addWidget(new QtEvolutionView(i + 1));
+		QVBoxLayout* layoutVert1 = new QVBoxLayout();
+		layoutHorz1->addLayout(layoutVert1);
+
+		for (int i = 0; i < evolutionSlotCount; i++)
+		{
+			layoutVert1->addWidget(new QtEvolutionView(i + 1, populationExchangeView));
+		}
+	}
+	{
+		layoutHorz1->addWidget(populationExchangeView);
 	}
 }

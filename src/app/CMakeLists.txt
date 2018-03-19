@@ -4,6 +4,8 @@ add_files(
 	
 	view/QtEvolutionView.cpp
 	view/QtEvolutionView.h
+	view/QtPopulationExchangeView.cpp
+	view/QtPopulationExchangeView.h
 	
 	window/content/QtMainContent.cpp
 	window/content/QtMainContent.h

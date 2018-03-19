@@ -11,6 +11,7 @@
 #include <QWidget>
 
 class NeuroEvolutionEnvironment;
+class QtPopulationExchangeView;
 
 class QtEvolutionView 
 	: public QWidget
@@ -18,7 +19,7 @@ class QtEvolutionView
 	Q_OBJECT
 
 public:
-	QtEvolutionView(int id, QWidget* parent = 0);
+	QtEvolutionView(int id, QtPopulationExchangeView* populationExchangeView, QWidget* parent = 0);
 	~QtEvolutionView();
 
 signals:
@@ -32,6 +33,8 @@ private:
 	void onStopClicked(bool checked);
 	void onResetClicked(bool checked);
 	void onContinueClicked(bool checked);
+	void onExportPopulationClicked(bool checked);
+	void onImportPopulationClicked(bool checked);
 
 	void updateButtonVisibility();
 
@@ -41,6 +44,7 @@ private:
 	void updateHistogram();
 
 	const int m_id;
+	QtPopulationExchangeView* m_populationExchangeView;
 	bool m_evolutionRunning;
 	std::shared_ptr<std::thread> m_evolutionThread;
 	std::shared_ptr<NeuroEvolutionEnvironment> m_evolutionEnvironment;
@@ -49,6 +53,8 @@ private:
 	QPushButton* m_stopButton;
 	QPushButton* m_resetButton;
 	QPushButton* m_continueButton;
+	QPushButton* m_exportPopulationButton;
+	QPushButton* m_importPopulationButton;
 	QLabel* m_statusLabel;
 	QLabel* m_generationLabel;
 	QLabel* m_fitnessLabel;
