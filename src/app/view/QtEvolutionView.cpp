@@ -29,7 +29,7 @@ QtEvolutionView::QtEvolutionView(int id, QtPopulationExchangeView* populationExc
 
 	{
 		QGroupBox* group = new QGroupBox();
-		group->setTitle(QString("Evolution Module %1").arg(m_id));
+		group->setTitle(QString("Evolution Module #%1").arg(m_id));
 		layoutVert1->addWidget(group);
 
 		QHBoxLayout* layoutHorz1 = new QHBoxLayout();

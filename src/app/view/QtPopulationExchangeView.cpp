@@ -1,19 +1,10 @@
 #include "view/QtPopulationExchangeView.h"
 
-#include <QBarCategoryAxis>
-#include <QBarSet>
-#include <QBarSeries>
-#include <QChart>
-#include <QChartView>
 #include <QGroupBox>
-#include <QPushButton>
-#include <QHBoxLayout>
-#include <QTimer>
 #include <QVBoxLayout>
+#include <QPushButton>
 
-#include "NeuroEvolutionEnvironment.h"
-#include "utility/Histogram.h"
-#include "utility/utilityRandom.h"
+#include "element/QtPopulationListItem.h"
 
 QtPopulationExchangeView::QtPopulationExchangeView(QWidget* parent)
 	: QWidget(parent)
@@ -30,29 +21,21 @@ QtPopulationExchangeView::QtPopulationExchangeView(QWidget* parent)
 		group->setLayout(layoutVert2);
 
 		{
-			QHBoxLayout* layoutHorz1 = new QHBoxLayout();
-			layoutVert2->addLayout(layoutHorz1);
-			{
-				QLabel* label = new QLabel();
-				label->setText("Evolution Module:");
-				layoutHorz1->addWidget(label);
-			}
-			{
-				m_evolutionIdLabel = new QLabel();
-				layoutHorz1->addWidget(m_evolutionIdLabel);
-			}
+			m_populationList = new QListWidget();
+			layoutVert2->addWidget(m_populationList);
 		}
 		{
 			QHBoxLayout* layoutHorz1 = new QHBoxLayout();
 			layoutVert2->addLayout(layoutHorz1);
+
 			{
-				QLabel* label = new QLabel();
-				label->setText("Highest Fitness:");
-				layoutHorz1->addWidget(label);
-			}
-			{
-				m_fitnessLabel = new QLabel();
-				layoutHorz1->addWidget(m_fitnessLabel);
+				QPushButton* button = new QPushButton();
+				button->setText("Remove Selected");
+				connect(
+					button, &QPushButton::clicked,
+					this, &QtPopulationExchangeView::onRemoveSelectedClicked
+				);
+				layoutHorz1->addWidget(button);
 			}
 		}
 
@@ -63,12 +46,31 @@ QtPopulationExchangeView::QtPopulationExchangeView(QWidget* parent)
 void QtPopulationExchangeView::addPopulation(
 	int evolutionViewId, float highestFitness, std::vector<NeuralNetworkGenotype> population)
 {
-	m_evolutionIdLabel->setText(QString::number(evolutionViewId));
-	m_fitnessLabel->setText(QString::number(highestFitness));
-	m_population = population;
+	{
+		QtPopulationListItem* listItem = new QtPopulationListItem(highestFitness, population);
+		m_populationList->addItem(listItem);
+	}
 }
 
 std::vector<NeuralNetworkGenotype> QtPopulationExchangeView::getPopulation() const
 {
-	return m_population;
+	std::vector<NeuralNetworkGenotype> population;
+	if (!m_populationList->selectedItems().empty())
+	{
+		QtPopulationListItem* listItem = dynamic_cast<QtPopulationListItem*>(m_populationList->selectedItems().front());
+		if (listItem)
+		{
+			population = listItem->getPopulation();
+		}
+	}
+
+	return population;
+}
+
+void QtPopulationExchangeView::onRemoveSelectedClicked(bool checked)
+{
+	for (QListWidgetItem* listItem : m_populationList->selectedItems())
+	{
+		m_populationList->takeItem(m_populationList->row(listItem));
+	}
 }

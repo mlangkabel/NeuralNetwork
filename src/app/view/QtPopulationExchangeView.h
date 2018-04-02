@@ -1,7 +1,7 @@
 #ifndef QT_POPULATION_EXCHANGE_VIEW_H
 #define QT_POPULATION_EXCHANGE_VIEW_H
 
-#include <QLabel>
+#include <QListWidget>
 #include <QWidget>
 
 #include "NeuralNetworkGenotype.h"
@@ -18,10 +18,9 @@ public:
 	std::vector<NeuralNetworkGenotype> getPopulation() const;
 
 private:
-	std::vector<NeuralNetworkGenotype> m_population;
+	void onRemoveSelectedClicked(bool checked);
 
-	QLabel* m_evolutionIdLabel;
-	QLabel* m_fitnessLabel;
+	QListWidget* m_populationList;
 };
 
 #endif // QT_POPULATION_EXCHANGE_VIEW_H
