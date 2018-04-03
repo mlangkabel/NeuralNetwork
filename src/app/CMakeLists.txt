@@ -16,8 +16,8 @@ add_files(
 	window/QtMainWindow.h
 	
 	main.cpp
-	NeuralNetworkGenotype.cpp
-	NeuralNetworkGenotype.h
+	NeuralNetworkSpecification.cpp
+	NeuralNetworkSpecification.h
 	NeuroEvolutionEnvironment.cpp
 	NeuroEvolutionEnvironment.h
 )

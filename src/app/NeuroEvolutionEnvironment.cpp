@@ -7,11 +7,11 @@ NeuroEvolutionEnvironment::NeuroEvolutionEnvironment(int populatioSize, int offs
 {
 }
 
-NeuralNetworkGenotype NeuroEvolutionEnvironment::crossover(const NeuralNetworkGenotype& genotype1, const NeuralNetworkGenotype& genotype2)
+NeuralNetworkSpecification NeuroEvolutionEnvironment::crossover(const NeuralNetworkSpecification& genotype1, const NeuralNetworkSpecification& genotype2)
 {
 	const float minInfluence = 0.2f;
 
-	NeuralNetworkGenotype mergedGenotype = genotype1;
+	NeuralNetworkSpecification mergedGenotype = genotype1;
 
 	for (int i = 0; i < mergedGenotype.inputToHiddenNodeWeights.getElementCount(); i++)
 	{
@@ -46,7 +46,7 @@ NeuralNetworkGenotype NeuroEvolutionEnvironment::crossover(const NeuralNetworkGe
 	return mergedGenotype;
 }
 
-NeuralNetworkGenotype NeuroEvolutionEnvironment::mutate(const NeuralNetworkGenotype& genotype)
+NeuralNetworkSpecification NeuroEvolutionEnvironment::mutate(const NeuralNetworkSpecification& genotype)
 {
 	WeightedRandomGenerator<int> countRng(utility::getRandomInt(0, 10000));
 	countRng.addResult(1, 1.0f / 2.0f);
@@ -56,7 +56,7 @@ NeuralNetworkGenotype NeuroEvolutionEnvironment::mutate(const NeuralNetworkGenot
 	countRng.addResult(5, 1.0f / 32.0f);
 
 	const int mutationCount = countRng.getResult();
-	NeuralNetworkGenotype mutatedGenotype = genotype;
+	NeuralNetworkSpecification mutatedGenotype = genotype;
 
 	WeightedRandomGenerator<Matrix<float>*> weightsRng(utility::getRandomInt(0, 10000));
 	weightsRng.addResult(&mutatedGenotype.inputToHiddenNodeWeights, mutatedGenotype.inputToHiddenNodeWeights.getElementCount());
@@ -74,7 +74,7 @@ NeuralNetworkGenotype NeuroEvolutionEnvironment::mutate(const NeuralNetworkGenot
 	return mutatedGenotype;
 }
 
-float NeuroEvolutionEnvironment::evaluate(const NeuralNetworkGenotype& genotype)
+float NeuroEvolutionEnvironment::evaluate(const NeuralNetworkSpecification& genotype)
 {
 	const int repetitions = 3;
 	float score = 0.0f;

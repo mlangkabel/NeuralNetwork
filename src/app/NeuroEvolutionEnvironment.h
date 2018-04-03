@@ -2,17 +2,17 @@
 #define NEURO_EVOLUTION_ENVIRONMENT_H
 
 #include "evolution/EvolutionEnvironment.h"
-#include "NeuralNetworkGenotype.h"
+#include "NeuralNetworkSpecification.h"
 
-class NeuroEvolutionEnvironment: public EvolutionEnvironment<NeuralNetworkGenotype>
+class NeuroEvolutionEnvironment: public EvolutionEnvironment<NeuralNetworkSpecification>
 {
 public:
 	NeuroEvolutionEnvironment(int populatioSize, int offspringSize, float crossoverProbability);
 
 private:
-	NeuralNetworkGenotype crossover(const NeuralNetworkGenotype& genotype1, const NeuralNetworkGenotype& genotype2) override;
-	NeuralNetworkGenotype mutate(const NeuralNetworkGenotype& genotype) override;
-	float evaluate(const NeuralNetworkGenotype& genotype) override;
+	NeuralNetworkSpecification crossover(const NeuralNetworkSpecification& genotype1, const NeuralNetworkSpecification& genotype2) override;
+	NeuralNetworkSpecification mutate(const NeuralNetworkSpecification& genotype) override;
+	float evaluate(const NeuralNetworkSpecification& genotype) override;
 };
 
 #endif // NEURO_EVOLUTION_ENVIRONMENT_H
