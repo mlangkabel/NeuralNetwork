@@ -4,7 +4,7 @@
 #include <QListWidget>
 #include <QWidget>
 
-#include "NeuralNetworkSpecification.h"
+#include "NeuralNetworkConfiguration.h"
 
 class QtPopulationExchangeView 
 	: public QWidget
@@ -14,8 +14,8 @@ class QtPopulationExchangeView
 public:
 	QtPopulationExchangeView(QWidget* parent = 0);
 	
-	void addPopulation(int evolutionViewId, float highestFitness, std::vector<NeuralNetworkSpecification> population);
-	std::vector<NeuralNetworkSpecification> getPopulation() const;
+	void addPopulation(int evolutionViewId, float highestFitness, std::vector<NeuralNetworkConfiguration> population);
+	std::vector<NeuralNetworkConfiguration> getPopulation() const;
 
 private:
 	void onRemoveSelectedClicked(bool checked);

@@ -3,18 +3,18 @@
 
 #include <QListWidgetItem>
 
-#include "NeuralNetworkSpecification.h"
+#include "NeuralNetworkConfiguration.h"
 
 class QtPopulationListItem 
 	: public QListWidgetItem
 {
 public:
-	QtPopulationListItem(float highestFitness, std::vector<NeuralNetworkSpecification> population);
+	QtPopulationListItem(float highestFitness, std::vector<NeuralNetworkConfiguration> population);
 	
-	std::vector<NeuralNetworkSpecification> getPopulation() const;
+	std::vector<NeuralNetworkConfiguration> getPopulation() const;
 
 private:
-	std::vector<NeuralNetworkSpecification> m_population;
+	std::vector<NeuralNetworkConfiguration> m_population;
 };
 
 #endif // QT_POPULATION_LIST_ITEM_H

@@ -44,7 +44,7 @@ QtPopulationExchangeView::QtPopulationExchangeView(QWidget* parent)
 }
 
 void QtPopulationExchangeView::addPopulation(
-	int evolutionViewId, float highestFitness, std::vector<NeuralNetworkSpecification> population)
+	int evolutionViewId, float highestFitness, std::vector<NeuralNetworkConfiguration> population)
 {
 	{
 		QtPopulationListItem* listItem = new QtPopulationListItem(highestFitness, population);
@@ -52,9 +52,9 @@ void QtPopulationExchangeView::addPopulation(
 	}
 }
 
-std::vector<NeuralNetworkSpecification> QtPopulationExchangeView::getPopulation() const
+std::vector<NeuralNetworkConfiguration> QtPopulationExchangeView::getPopulation() const
 {
-	std::vector<NeuralNetworkSpecification> population;
+	std::vector<NeuralNetworkConfiguration> population;
 	if (!m_populationList->selectedItems().empty())
 	{
 		QtPopulationListItem* listItem = dynamic_cast<QtPopulationListItem*>(m_populationList->selectedItems().front());

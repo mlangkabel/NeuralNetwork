@@ -1,4 +1,4 @@
-#include "NeuralNetworkSpecification.h"
+#include "NeuralNetworkConfiguration.h"
 
 #include "tinyxml/tinyxml.h"
 
@@ -9,7 +9,7 @@
 
 typedef NeuralNetworkCpu NeuralNetwork;
 
-NeuralNetworkSpecification::NeuralNetworkSpecification()
+NeuralNetworkConfiguration::NeuralNetworkConfiguration()
 	: inputNodeAmount(0)
 	, hiddenNodeAmount(0)
 	, outputNodeAmount(0)
@@ -19,7 +19,7 @@ NeuralNetworkSpecification::NeuralNetworkSpecification()
 {
 }
 
-NeuralNetworkSpecification::NeuralNetworkSpecification(int inputNodeAmount, int hiddenNodeAmount, int outputNodeAmount)
+NeuralNetworkConfiguration::NeuralNetworkConfiguration(int inputNodeAmount, int hiddenNodeAmount, int outputNodeAmount)
 	: inputNodeAmount(inputNodeAmount)
 	, hiddenNodeAmount(hiddenNodeAmount)
 	, outputNodeAmount(outputNodeAmount)
@@ -29,41 +29,41 @@ NeuralNetworkSpecification::NeuralNetworkSpecification(int inputNodeAmount, int 
 {
 }
 
-NeuralNetworkSpecification createRandomNeuralNetworkSpecification(int hiddenNodeAmount)
+NeuralNetworkConfiguration createRandomNeuralNetworkConfiguration(int hiddenNodeAmount)
 {
 	const int inputNodeAmount = 3;
 	const int outputNodeAmount = 5;
 
-	NeuralNetworkSpecification specification(inputNodeAmount, hiddenNodeAmount, outputNodeAmount);
+	NeuralNetworkConfiguration configuration(inputNodeAmount, hiddenNodeAmount, outputNodeAmount);
 
-	for (int y = 0; y < specification.inputToHiddenNodeWeights.getHeight() ; y++)
+	for (int y = 0; y < configuration.inputToHiddenNodeWeights.getHeight() ; y++)
 	{
-		for (int x = 0; x < specification.inputToHiddenNodeWeights.getWidth(); x++)
+		for (int x = 0; x < configuration.inputToHiddenNodeWeights.getWidth(); x++)
 		{
-			specification.inputToHiddenNodeWeights.setValue(x, y, utility::getRandomFloat(-1.0f, 1.0f));
+			configuration.inputToHiddenNodeWeights.setValue(x, y, utility::getRandomFloat(-1.0f, 1.0f));
 		}
 	}
 
-	for (int y = 0; y < specification.hiddenToHiddenNodeWeights.getHeight(); y++)
+	for (int y = 0; y < configuration.hiddenToHiddenNodeWeights.getHeight(); y++)
 	{
-		for (int x = 0; x < specification.hiddenToHiddenNodeWeights.getWidth(); x++)
+		for (int x = 0; x < configuration.hiddenToHiddenNodeWeights.getWidth(); x++)
 		{
-			specification.hiddenToHiddenNodeWeights.setValue(x, y, utility::getRandomFloat(-1.0f, 1.0f));
+			configuration.hiddenToHiddenNodeWeights.setValue(x, y, utility::getRandomFloat(-1.0f, 1.0f));
 		}
 	}
 
-	for (int y = 0; y < specification.hiddenToOutputNodeWeights.getHeight(); y++)
+	for (int y = 0; y < configuration.hiddenToOutputNodeWeights.getHeight(); y++)
 	{
-		for (int x = 0; x < specification.hiddenToOutputNodeWeights.getWidth(); x++)
+		for (int x = 0; x < configuration.hiddenToOutputNodeWeights.getWidth(); x++)
 		{
-			specification.hiddenToOutputNodeWeights.setValue(x, y, utility::getRandomFloat(-1.0f, 1.0f));
+			configuration.hiddenToOutputNodeWeights.setValue(x, y, utility::getRandomFloat(-1.0f, 1.0f));
 		}
 	}
 
-	return specification;
+	return configuration;
 }
 
-TiXmlElement* neuralNetworkSpecificationToXml(const NeuralNetworkSpecification& genotype)
+TiXmlElement* neuralNetworkConfigurationToXml(const NeuralNetworkConfiguration& configuration)
 {
 	TiXmlElement* elementNeuralNetwork = new TiXmlElement("neural_network");
 	elementNeuralNetwork->SetAttribute("input_node_group_id", 0);
@@ -72,14 +72,14 @@ TiXmlElement* neuralNetworkSpecificationToXml(const NeuralNetworkSpecification& 
 	{
 		TiXmlElement* elementNodeGroup = new TiXmlElement("node_group_linear_excitation");
 		elementNodeGroup->SetAttribute("id", 0);
-		elementNodeGroup->SetAttribute("node_count", genotype.inputNodeAmount);
+		elementNodeGroup->SetAttribute("node_count", configuration.inputNodeAmount);
 		elementNodeGroup->SetAttribute("excitation_factor", "1.0");
 		elementNeuralNetwork->LinkEndChild(elementNodeGroup);
 	}
 	{
 		TiXmlElement* elementNodeGroup = new TiXmlElement("node_group_step_excitation");
 		elementNodeGroup->SetAttribute("id", 1);
-		elementNodeGroup->SetAttribute("node_count", genotype.hiddenNodeAmount);
+		elementNodeGroup->SetAttribute("node_count", configuration.hiddenNodeAmount);
 		elementNodeGroup->SetAttribute("excitation_threshold", "0.5");
 		elementNodeGroup->SetAttribute("excitation_fatigue", "0.5");
 		elementNeuralNetwork->LinkEndChild(elementNodeGroup);
@@ -87,7 +87,7 @@ TiXmlElement* neuralNetworkSpecificationToXml(const NeuralNetworkSpecification& 
 	{
 		TiXmlElement* elementNodeGroup = new TiXmlElement("node_group_step_excitation");
 		elementNodeGroup->SetAttribute("id", 2);
-		elementNodeGroup->SetAttribute("node_count", genotype.outputNodeAmount);
+		elementNodeGroup->SetAttribute("node_count", configuration.outputNodeAmount);
 		elementNodeGroup->SetAttribute("excitation_threshold", "0.5");
 		elementNodeGroup->SetAttribute("excitation_fatigue", "0.1");
 		elementNeuralNetwork->LinkEndChild(elementNodeGroup);
@@ -96,31 +96,31 @@ TiXmlElement* neuralNetworkSpecificationToXml(const NeuralNetworkSpecification& 
 		TiXmlElement* elementEdgeGroup = new TiXmlElement("edge_group");
 		elementEdgeGroup->SetAttribute("source_group_id", 0);
 		elementEdgeGroup->SetAttribute("target_group_id", 1);
-		elementEdgeGroup->SetAttribute("weights", genotype.inputToHiddenNodeWeights.getValuesAsString().c_str());
+		elementEdgeGroup->SetAttribute("weights", configuration.inputToHiddenNodeWeights.getValuesAsString().c_str());
 		elementNeuralNetwork->LinkEndChild(elementEdgeGroup);
 	}
 	{
 		TiXmlElement* elementEdgeGroup = new TiXmlElement("edge_group");
 		elementEdgeGroup->SetAttribute("source_group_id", 1);
 		elementEdgeGroup->SetAttribute("target_group_id", 1);
-		elementEdgeGroup->SetAttribute("weights", genotype.hiddenToHiddenNodeWeights.getValuesAsString().c_str());
+		elementEdgeGroup->SetAttribute("weights", configuration.hiddenToHiddenNodeWeights.getValuesAsString().c_str());
 		elementNeuralNetwork->LinkEndChild(elementEdgeGroup);
 	}
 	{
 		TiXmlElement* elementEdgeGroup = new TiXmlElement("edge_group");
 		elementEdgeGroup->SetAttribute("source_group_id", 1);
 		elementEdgeGroup->SetAttribute("target_group_id", 2);
-		elementEdgeGroup->SetAttribute("weights", genotype.hiddenToOutputNodeWeights.getValuesAsString().c_str());
+		elementEdgeGroup->SetAttribute("weights", configuration.hiddenToOutputNodeWeights.getValuesAsString().c_str());
 		elementNeuralNetwork->LinkEndChild(elementEdgeGroup);
 	}
 
 	return elementNeuralNetwork;
 }
 
-std::string neuralNetworkSpecificationToString(const NeuralNetworkSpecification& genotype)
+std::string neuralNetworkConfigurationToString(const NeuralNetworkConfiguration& configuration)
 {
 	TiXmlDocument doc;
-	doc.LinkEndChild(neuralNetworkSpecificationToXml(genotype));
+	doc.LinkEndChild(neuralNetworkConfigurationToXml(configuration));
 
 	TiXmlPrinter printer;
 	doc.Accept(&printer);
@@ -128,7 +128,7 @@ std::string neuralNetworkSpecificationToString(const NeuralNetworkSpecification&
 	return printer.CStr();
 }
 
-//NeuralNetworkGenotype neuralNetworkGenotypeFromXml(const std::string& xml)
+//NeuralNetworkConfiguration neuralNetworkConfigurationFromXml(const std::string& xml)
 //{
 //	TiXmlDocument doc;
 //	doc.Parse(
@@ -234,12 +234,12 @@ std::string neuralNetworkSpecificationToString(const NeuralNetworkSpecification&
 //	return neuralNetwork;
 //}
 
-float runPingEvaluation(NeuralNetworkSpecification genotype, bool verbose)
+float runPingEvaluation(NeuralNetworkConfiguration genotype, bool verbose)
 {
 	return runPingEvaluation(genotype, utility::getRandomInt(0, genotype.outputNodeAmount - 1), verbose);
 }
 
-float runPingEvaluation(NeuralNetworkSpecification genotype, const int nunmberOfPings, bool verbose)
+float runPingEvaluation(NeuralNetworkConfiguration genotype, const int nunmberOfPings, bool verbose)
 {
 	if (verbose)
 	{
@@ -251,7 +251,7 @@ float runPingEvaluation(NeuralNetworkSpecification genotype, const int nunmberOf
 		LOG_INFO("Conducted number of pings: " + std::to_string(nunmberOfPings));
 	}
 
-	std::shared_ptr<NeuralNetwork> neuralNetwork = NeuralNetwork::load(TextAccess::createFromString(neuralNetworkSpecificationToString(genotype)));
+	std::shared_ptr<NeuralNetwork> neuralNetwork = NeuralNetwork::load(TextAccess::createFromString(neuralNetworkConfigurationToString(genotype)));
 
 	if (!neuralNetwork)
 	{

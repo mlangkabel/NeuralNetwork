@@ -246,7 +246,7 @@ void QtEvolutionView::onImportPopulationClicked(bool checked)
 {
 	if (m_evolutionEnvironment)
 	{
-		std::vector<NeuralNetworkSpecification> population = m_populationExchangeView->getPopulation();
+		std::vector<NeuralNetworkConfiguration> population = m_populationExchangeView->getPopulation();
 		if (population.empty())
 		{
 			LOG_ERROR("Population to import is empty.");
@@ -257,7 +257,7 @@ void QtEvolutionView::onImportPopulationClicked(bool checked)
 		}
 		else
 		{
-			for (const NeuralNetworkSpecification& genotype : m_populationExchangeView->getPopulation())
+			for (const NeuralNetworkConfiguration& genotype : m_populationExchangeView->getPopulation())
 			{
 				m_evolutionEnvironment->addGenotype(genotype);
 			}
@@ -311,7 +311,7 @@ void QtEvolutionView::setupEvolutionEnvironment()
 
 	for (int i = 0; i < populationSize; i++)
 	{
-		m_evolutionEnvironment->addGenotype(createRandomNeuralNetworkSpecification(m_hiddenNodeCountBox->value()));
+		m_evolutionEnvironment->addGenotype(createRandomNeuralNetworkConfiguration(m_hiddenNodeCountBox->value()));
 	}
 
 	m_statusLabel->setText("Population initialized.");
