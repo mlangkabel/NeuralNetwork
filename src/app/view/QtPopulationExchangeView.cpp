@@ -66,6 +66,8 @@ void QtPopulationExchangeView::addPopulation(
 	{
 		QtPopulationListItem* listItem = new QtPopulationListItem(population);
 		m_populationList->addItem(listItem);
+		m_populationList->clearSelection();
+		listItem->setSelected(true);
 	}
 }
 
@@ -89,6 +91,10 @@ void QtPopulationExchangeView::onRemoveSelectedClicked(bool checked)
 	for (QListWidgetItem* listItem : m_populationList->selectedItems())
 	{
 		m_populationList->takeItem(m_populationList->row(listItem));
+	}
+	if (m_populationList->count() > 0)
+	{
+		m_populationList->item(m_populationList->count() - 1)->setSelected(true);
 	}
 }
 
