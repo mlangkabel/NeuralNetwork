@@ -9,10 +9,15 @@
 class TiXmlElement;
 class NeuralNodeGroupCpu;
 
+struct NeuralEdgeGroupConfiguration;
+
 class NeuralEdgeGroupCpu
 {
 public:
-	static std::shared_ptr<NeuralEdgeGroupCpu> loadFromXmlElement(const TiXmlElement* element, const std::vector<std::shared_ptr<NeuralNodeGroupCpu>>& nodeGroups);
+	static std::shared_ptr<NeuralEdgeGroupCpu> create(
+		const NeuralEdgeGroupConfiguration& configuration,
+		const std::vector<std::shared_ptr<NeuralNodeGroupCpu>>& nodeGroups
+	);
 
 	NeuralEdgeGroupCpu(
 		std::shared_ptr<NeuralNodeGroupCpu> sourceNodes,

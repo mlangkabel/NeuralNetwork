@@ -3,63 +3,38 @@
 #include "tinyxml/tinyxml.h"
 
 #include "neural_network/cpu/NeuralNodeGroupCpu.h"
+#include "neural_network/NeuralNetworkConfiguration.h"
 #include "utility/logging.h"
 #include "utility/utilityString.h"
 
-std::shared_ptr<NeuralEdgeGroupCpu> NeuralEdgeGroupCpu::loadFromXmlElement(const TiXmlElement* element, const std::vector<std::shared_ptr<NeuralNodeGroupCpu>>& nodeGroups)
+std::shared_ptr<NeuralEdgeGroupCpu> NeuralEdgeGroupCpu::create(
+	const NeuralEdgeGroupConfiguration& configuration,
+	const std::vector<std::shared_ptr<NeuralNodeGroupCpu>>& nodeGroups
+)
 {
-	std::shared_ptr<NeuralEdgeGroupCpu> nodeGroup;
-	if (element)
+	std::shared_ptr<NeuralEdgeGroupCpu> edgeGroup;
+
+	std::shared_ptr<NeuralNodeGroupCpu> sourceNodes;
+	std::shared_ptr<NeuralNodeGroupCpu> targetNodes;
+	for (const std::shared_ptr<NeuralNodeGroupCpu>& nodeGroup : nodeGroups)
 	{
-		if (std::string(element->Value()) != "edge_group")
+		if (nodeGroup->getId() == configuration.sourceGroupId)
 		{
-			return nodeGroup;
+			sourceNodes = nodeGroup;
 		}
-
-		int sourceGroupId;
-		if (!element->QueryIntAttribute("source_group_id", &sourceGroupId) == TIXML_SUCCESS || sourceGroupId < 0)
+		if (nodeGroup->getId() == configuration.targetGroupId)
 		{
-			return nodeGroup;
-		}
-
-		int targetGroupId;
-		if (!element->QueryIntAttribute("target_group_id", &targetGroupId) == TIXML_SUCCESS || targetGroupId < 0)
-		{
-			return nodeGroup;
-		}
-
-		const std::string weightsString = element->Attribute("weights");
-		if (weightsString.empty())
-		{
-			return nodeGroup;
-		}
-
-		std::shared_ptr<NeuralNodeGroupCpu> sourceNodes;
-		std::shared_ptr<NeuralNodeGroupCpu> targetNodes;
-		for (const std::shared_ptr<NeuralNodeGroupCpu>& nodeGroup : nodeGroups)
-		{
-			if (nodeGroup->getId() == sourceGroupId)
-			{
-				sourceNodes = nodeGroup;
-			}
-			if (nodeGroup->getId() == targetGroupId)
-			{
-				targetNodes = nodeGroup;
-			}
-		}
-		
-		if (sourceNodes && targetNodes)
-		{
-			Matrix<float> weights(sourceNodes->getNodeCount(), targetNodes->getNodeCount());
-			if (!weights.setValuesFromString(weightsString))
-			{
-				return nodeGroup;
-			}
-			nodeGroup = std::make_shared<NeuralEdgeGroupCpu>(sourceNodes, targetNodes);
-			nodeGroup->setWeights(weights);
+			targetNodes = nodeGroup;
 		}
 	}
-	return nodeGroup;
+
+	if (sourceNodes && targetNodes)
+	{
+		edgeGroup = std::make_shared<NeuralEdgeGroupCpu>(sourceNodes, targetNodes);
+		edgeGroup->setWeights(configuration.weights);
+	}
+
+	return edgeGroup;
 }
 
 NeuralEdgeGroupCpu::NeuralEdgeGroupCpu(

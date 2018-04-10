@@ -11,10 +11,6 @@ add_files(
 	neural_network/cpu/NeuralNetworkCpu.h
 	neural_network/cpu/NeuralNodeGroupCpu.cpp
 	neural_network/cpu/NeuralNodeGroupCpu.h
-	neural_network/cpu/NeuralNodeGroupLinearExcitationCpu.cpp
-	neural_network/cpu/NeuralNodeGroupLinearExcitationCpu.h
-	neural_network/cpu/NeuralNodeGroupStepExcitationCpu.cpp
-	neural_network/cpu/NeuralNodeGroupStepExcitationCpu.h
 	
 	neural_network/gpu/NeuralEdgeGroupGpu.cpp
 	neural_network/gpu/NeuralEdgeGroupGpu.h
@@ -26,6 +22,9 @@ add_files(
 	neural_network/gpu/NeuralNodeGroupLinearExcitationGpu.h
 	neural_network/gpu/NeuralNodeGroupStepExcitationGpu.cpp
 	neural_network/gpu/NeuralNodeGroupStepExcitationGpu.h
+	
+	neural_network/NeuralNetworkConfiguration.cpp
+	neural_network/NeuralNetworkConfiguration.h
 	
 	utility/cl/ClSystem.cpp
 	utility/cl/ClSystem.h

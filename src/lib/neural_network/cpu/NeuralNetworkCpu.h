@@ -9,10 +9,12 @@
 class NeuralNodeGroupCpu;
 class NeuralEdgeGroupCpu;
 
+struct NeuralNetworkConfiguration;
+
 class NeuralNetworkCpu
 {
 public:
-	static std::shared_ptr<NeuralNetworkCpu> load(std::shared_ptr<const TextAccess> textAccess);
+	static std::shared_ptr<NeuralNetworkCpu> create(const NeuralNetworkConfiguration& configuration);
 
 	void setInputExcitationLevels(std::vector<float> excitationLevels);
 	std::vector<float> getOutputExcitationStates();
@@ -28,6 +30,5 @@ private:
 	std::shared_ptr<NeuralNodeGroupCpu> m_inputNodeGroup;
 	std::shared_ptr<NeuralNodeGroupCpu> m_outputNodeGroup;
 };
-
 
 #endif // NEURAL_NETWORK_CPU_H

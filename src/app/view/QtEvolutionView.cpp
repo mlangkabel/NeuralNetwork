@@ -12,10 +12,9 @@
 #include <QVBoxLayout>
 
 #include "view/QtPopulationExchangeView.h"
-
 #include "utility/Histogram.h"
 #include "utility/utilityRandom.h"
-
+#include "NeuralNetworkPopulation.h"
 #include "NeuroEvolutionEnvironment.h"
 
 QtEvolutionView::QtEvolutionView(int id, QtPopulationExchangeView* populationExchangeView, QWidget* parent)
@@ -236,9 +235,11 @@ void QtEvolutionView::onExportPopulationClicked(bool checked)
 {
 	if (m_evolutionEnvironment)
 	{
-		m_populationExchangeView->addPopulation(
-			m_id, m_evolutionEnvironment->getHighestFitness(), m_evolutionEnvironment->getPopulation()
-		);
+		NeuralNetworkPopulation population;
+		population.hiddenNodeCount = m_hiddenNodeCountBox->value();
+		population.fitness = m_evolutionEnvironment->getHighestFitness();
+		population.configurations = m_evolutionEnvironment->getPopulation();
+		m_populationExchangeView->addPopulation(m_id, population);
 	}
 }
 
@@ -246,18 +247,18 @@ void QtEvolutionView::onImportPopulationClicked(bool checked)
 {
 	if (m_evolutionEnvironment)
 	{
-		std::vector<NeuralNetworkConfiguration> population = m_populationExchangeView->getPopulation();
-		if (population.empty())
+		NeuralNetworkPopulation population = m_populationExchangeView->getPopulation();
+		if (population.configurations.empty())
 		{
 			LOG_ERROR("Population to import is empty.");
 		}
-		else if (population.front().hiddenNodeAmount != m_hiddenNodeCountBox->value())
+		else if (population.hiddenNodeCount != m_hiddenNodeCountBox->value())
 		{
-			LOG_ERROR("Importing populationfailed because hidden node amount is mismatching.");
+			LOG_ERROR("Importing population failed because hidden node amount is mismatching.");
 		}
 		else
 		{
-			for (const NeuralNetworkConfiguration& genotype : m_populationExchangeView->getPopulation())
+			for (const NeuralNetworkConfiguration& genotype : population.configurations)
 			{
 				m_evolutionEnvironment->addGenotype(genotype);
 			}
@@ -330,7 +331,12 @@ void QtEvolutionView::startEvolution()
 				{
 					m_evolutionEnvironment->processGeneration();
 
-					emit requestUiUpdate();
+					const int uiUpdateFrequency = 4;
+					const int generation = m_evolutionEnvironment->getGenerationCount();
+					if (0 == generation % uiUpdateFrequency)
+					{
+						emit requestUiUpdate();
+					}
 				}
 			}
 		);

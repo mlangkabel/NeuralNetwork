@@ -3,109 +3,43 @@
 #include "tinyxml/tinyxml.h"
 
 #include "neural_network/cpu/NeuralEdgeGroupCpu.h"
-#include "neural_network/cpu/NeuralNodeGroupLinearExcitationCpu.h"
-#include "neural_network/cpu/NeuralNodeGroupStepExcitationCpu.h"
+#include "neural_network/cpu/NeuralNodeGroupCpu.h"
+#include "neural_network/NeuralNetworkConfiguration.h"
 
-std::shared_ptr<NeuralNetworkCpu> NeuralNetworkCpu::load(std::shared_ptr<const TextAccess> textAccess)
+std::shared_ptr<NeuralNetworkCpu> NeuralNetworkCpu::create(const NeuralNetworkConfiguration& configuration)
 {
-	TiXmlDocument doc;
-	doc.Parse(
-		textAccess->getText().c_str(),
-		0,
-		TIXML_ENCODING_UTF8
-	);
-
-	const TiXmlElement* elementNeuralNetwork = doc.FirstChildElement("neural_network");
-
-	if (!elementNeuralNetwork)
-	{
-		return std::shared_ptr<NeuralNetworkCpu>();
-	}
-
 	std::shared_ptr<NeuralNetworkCpu> neuralNetwork = std::shared_ptr<NeuralNetworkCpu>(new NeuralNetworkCpu());
 
+	for (const NeuralNodeGroupConfiguration& nodeGroupConfiguration : configuration.nodeGroups)
 	{
-		const std::string elementName = "node_group_step_excitation";
-		const TiXmlElement* elementNodeGroup = elementNeuralNetwork->FirstChildElement(elementName.c_str());
-		while (elementNodeGroup)
+		std::shared_ptr<NeuralNodeGroupCpu> nodeGroup = NeuralNodeGroupCpu::create(nodeGroupConfiguration);
+		if (nodeGroup)
 		{
-			std::shared_ptr<NeuralNodeGroupCpu> nodeGroup = NeuralNodeGroupStepExcitationCpu::loadFromXmlElement(elementNodeGroup);
-			if (!nodeGroup)
-			{
-				return std::shared_ptr<NeuralNetworkCpu>();
-			}
 			neuralNetwork->m_nodeGroups.push_back(nodeGroup);
-			elementNodeGroup = elementNodeGroup->NextSiblingElement(elementName.c_str());
-		}
-	}
-
-	{
-		const std::string elementName = "node_group_linear_excitation";
-		const TiXmlElement* elementNodeGroup = elementNeuralNetwork->FirstChildElement(elementName.c_str());
-		while (elementNodeGroup)
-		{
-			std::shared_ptr<NeuralNodeGroupCpu> nodeGroup = NeuralNodeGroupLinearExcitationCpu::loadFromXmlElement(elementNodeGroup);
-			if (!nodeGroup)
-			{
-				return std::shared_ptr<NeuralNetworkCpu>();
-			}
-			neuralNetwork->m_nodeGroups.push_back(nodeGroup);
-			elementNodeGroup = elementNodeGroup->NextSiblingElement(elementName.c_str());
-		}
-	}
-
-	{
-		int inputNodeGroupId = -1;
-		if (elementNeuralNetwork->QueryIntAttribute("input_node_group_id", &inputNodeGroupId) != TIXML_SUCCESS)
-		{
-			return std::shared_ptr<NeuralNetworkCpu>();
-		}
-		for (std::shared_ptr<NeuralNodeGroupCpu> nodeGroup : neuralNetwork->m_nodeGroups)
-		{
-			if (nodeGroup->getId() == inputNodeGroupId)
+			if (nodeGroup->getId() == configuration.inputGroupId)
 			{
 				neuralNetwork->m_inputNodeGroup = nodeGroup;
-				break;
 			}
-		}
-		if (!neuralNetwork->m_inputNodeGroup)
-		{
-			return std::shared_ptr<NeuralNetworkCpu>();
-		}
-	}
-
-	{
-		int outputNodeGroupId = -1;
-		if (elementNeuralNetwork->QueryIntAttribute("output_node_group_id", &outputNodeGroupId) != TIXML_SUCCESS)
-		{
-			return std::shared_ptr<NeuralNetworkCpu>();
-		}
-		for (std::shared_ptr<NeuralNodeGroupCpu> nodeGroup : neuralNetwork->m_nodeGroups)
-		{
-			if (nodeGroup->getId() == outputNodeGroupId)
+			if (nodeGroup->getId() == configuration.outputGroupId)
 			{
 				neuralNetwork->m_outputNodeGroup = nodeGroup;
-				break;
 			}
 		}
-		if (!neuralNetwork->m_outputNodeGroup)
+		else
 		{
-			return std::shared_ptr<NeuralNetworkCpu>();
+			throw std::logic_error("Could not initialize node group from configuration.");
 		}
 	}
-
+	for (const NeuralEdgeGroupConfiguration& edgeGroupConfiguration : configuration.edgeGroups)
 	{
-		const std::string elementName = "edge_group";
-		const TiXmlElement* elementEdgeGroup = elementNeuralNetwork->FirstChildElement(elementName.c_str());
-		while (elementEdgeGroup)
+		std::shared_ptr<NeuralEdgeGroupCpu> edgeGroup = NeuralEdgeGroupCpu::create(edgeGroupConfiguration, neuralNetwork->m_nodeGroups);
+		if (edgeGroup)
 		{
-			std::shared_ptr<NeuralEdgeGroupCpu> edgeGroup = NeuralEdgeGroupCpu::loadFromXmlElement(elementEdgeGroup, neuralNetwork->m_nodeGroups);
-			if (!edgeGroup)
-			{
-				return std::shared_ptr<NeuralNetworkCpu>();
-			}
 			neuralNetwork->m_edgeGroups.push_back(edgeGroup);
-			elementEdgeGroup = elementEdgeGroup->NextSiblingElement(elementName.c_str());
+		}
+		else
+		{
+			throw std::logic_error("Could not initialize edge group from configuration.");
 		}
 	}
 
